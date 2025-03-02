@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shell Gas Checkout</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
+        .w3-bar { background-color: #d50000 !important; color: white; }
+        .w3-button { color: white !important; }
+        .content { flex: 1; padding: 60px 20px 20px; } /* Increased top padding to prevent overlap */
+        .card { background-color: #e0e0e0; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        footer { margin-top: auto; }
+        .checkout-form { margin-bottom: 20px; }
+        .checkout-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+    <div class="w3-bar w3-card">
+        <a href="#" class="w3-bar-item w3-button"><b>Shell</b> Gas Station</a>
+        <a href="#logout" class="w3-bar-item w3-button w3-right">Logout</a>
+    </div>
+</div>
+
+<!-- Page Content -->
+<div class="w3-content w3-padding content" style="max-width:1200px">
+    <h2 class="w3-margin-top">Checkout</h2>
+    <p>Please enter your details to complete your order.</p>
+
+    <!-- Checkout Form -->
+    <div class="card checkout-form">
+        <h3>Order Details</h3>
+        <form id="checkoutForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" class="w3-input w3-border" required>
+
+            <label for="amount">Total Amount (PHP):</label>
+            <input type="number" id="amount" class="w3-input w3-border" required>
+
+            <button type="submit" class="checkout-btn">Confirm Payment</button>
+        </form>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="w3-center w3-black w3-padding-16">
+    <p>Shell Gas Station | Powered by Shell</p>
+</footer>
+
+<script>
+    // Retrieve branch from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const branch = urlParams.get('branch');
+    document.getElementById("branch").innerText = `Selected Branch: ${branch}`;
+
+    // Handle form submission
+    document.getElementById("checkoutForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const name = document.getElementById("name").value;
+        const amount = document.getElementById("amount").value;
+        alert(`Thank you, ${name}! Your payment of ₱${amount} has been processed for ${branch}.`);
+        window.location.href = "customer.html"; // Redirect back to customer page
+    });
+</script>
+
+</body>
+</html>

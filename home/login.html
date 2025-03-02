@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shell Employee Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
+        .w3-bar { background-color: #d50000 !important; color: white; }
+        .w3-button { color: white !important; }
+        .shell-red { background-color: #d50000; color: white; }
+        .login-container { background-color: #e0e0e0; padding: 20px; border-radius: 10px; }
+        .content { flex: 1; }
+        footer { margin-top: auto; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+    <div class="w3-bar w3-card">
+        <a href="#" class="w3-bar-item w3-button"><b>Shell</b> Employee Portal</a>
+    </div>
+</div>
+
+<!-- Header -->
+<header class="w3-display-container w3-content w3-wide" style="max-width:1500px;" id="home">
+    <img class="w3-image" src="https://i.pinimg.com/736x/1c/77/a6/1c77a66033942e5f45f3172ff1cfd4eb.jpg" alt="Shell" width="200">    
+</header>
+
+<!-- Page Content -->
+<div class="w3-content w3-padding content" style="max-width:1200px">
+    
+    <!-- Login Section -->
+    <div class="w3-container w3-padding-32 w3-center">
+        <div class="login-container w3-padding">
+            <h3>Employee Login</h3>
+            <form onsubmit="redirectToDashboard(event)">
+                <input class="w3-input w3-border" type="text" id="employeeID" placeholder="Employee ID" required>
+                <input class="w3-input w3-border w3-margin-top" type="password" id="password" placeholder="Password" required>
+                <button class="w3-button shell-red w3-margin-top" type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="w3-center w3-black w3-padding-16">
+    <p>Shell Employee Portal | Powered by Shell</p>
+</footer>
+
+<script>
+    function redirectToDashboard(event) {
+        event.preventDefault(); // Prevents the default form submission
+
+        // Redirect to employee home page (dashboard)
+        window.location.href = "homepage.html";
+    }
+</script>
+
+</body>
+</html>

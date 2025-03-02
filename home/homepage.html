@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shell Employee Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
+        .w3-bar { background-color: #d50000 !important; color: white; }
+        .w3-button { color: white !important; }
+        .content { flex: 1; padding: 60px 20px 20px; } /* Prevent overlap with navbar */
+        .card { background-color: #e0e0e0; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        footer { margin-top: auto; }
+    </style>
+    <script>
+        function logout() {
+            window.location.href = "login.html"; // Redirect to login page
+        }
+    </script>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+    <div class="w3-bar w3-card">
+        <a href="#" class="w3-bar-item w3-button"><b>Shell</b> Employee Dashboard</a>
+        <a href="#employees" class="w3-bar-item w3-button">Employees</a>
+        <a href="javascript:void(0);" onclick="logout()" class="w3-bar-item w3-button w3-right">Logout</a>
+    </div>
+</div>
+
+<!-- Page Content -->
+<div class="w3-content w3-padding content" style="max-width:1200px">
+    <h2 class="w3-margin-top">Welcome to the Employee Dashboard</h2>
+    <p>Manage employee records below.</p>
+    
+    <!-- Employee Section -->
+    <div class="card">
+        <h3>Employee Management</h3>
+        <table class="w3-table w3-bordered">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Role</th>
+                <th>Branch</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Actions</th>
+            </tr>
+            <tr>
+                <td>001</td>
+                <td>Juan Dela Cruz</td>
+                <td>Sales</td>
+                <td>Manager</td>
+                <td>Main Branch</td>
+                <td>08:00</td>
+                <td>17:00</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>002</td>
+                <td>Maria Santos</td>
+                <td>HR</td>
+                <td>HR Manager</td>
+                <td>Main Branch</td>
+                <td>09:00</td>
+                <td>18:00</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>003</td>
+                <td>Carlos Reyes</td>
+                <td>Finance</td>
+                <td>Accountant</td>
+                <td>Branch A</td>
+                <td>08:30</td>
+                <td>17:30</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>004</td>
+                <td>Ana Mendoza</td>
+                <td>Marketing</td>
+                <td>Marketing Head</td>
+                <td>Branch B</td>
+                <td>10:00</td>
+                <td>19:00</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>005</td>
+                <td>Pedro Gomez</td>
+                <td>Operations</td>
+                <td>Supervisor</td>
+                <td>Branch C</td>
+                <td>07:00</td>
+                <td>16:00</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>006</td>
+                <td>Luis Hernandez</td>
+                <td>IT</td>
+                <td>System Admin</td>
+                <td>Main Branch</td>
+                <td>08:00</td>
+                <td>17:00</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>007</td>
+                <td>Rosa Villanueva</td>
+                <td>Customer Service</td>
+                <td>Representative</td>
+                <td>Branch D</td>
+                <td>09:00</td>
+                <td>18:00</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>008</td>
+                <td>Elena Cruz</td>
+                <td>Logistics</td>
+                <td>Coordinator</td>
+                <td>Branch E</td>
+                <td>08:00</td>
+                <td>17:00</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>009</td>
+                <td>Ricardo Dizon</td>
+                <td>Maintenance</td>
+                <td>Technician</td>
+                <td>Branch F</td>
+                <td>07:00</td>
+                <td>16:00</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>010</td>
+                <td>Francis Lim</td>
+                <td>Security</td>
+                <td>Security Officer</td>
+                <td>Main Branch</td>
+                <td>22:00</td>
+                <td>06:00</td>
+                <td>
+                    <button class="w3-button w3-small w3-blue">Edit</button>
+                    <button class="w3-button w3-small w3-red">Delete</button>
+                </td>
+            </tr>
+        </table>
+        <button class="w3-button w3-green w3-margin-top">Add Employee</button>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="w3-center w3-black w3-padding-16">
+    <p>Shell Employee Portal | Powered by Shell</p>
+</footer>
+
+</body>
+</html>

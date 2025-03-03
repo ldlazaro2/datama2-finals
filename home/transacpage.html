@@ -1,60 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <title>Transaction Page - Shell Gas Station</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transactions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
+        .w3-bar { background-color: #d50000 !important; color: white; }
+        .w3-button { color: white !important; }
+        .content { flex: 1; padding: 60px 20px 20px; }
+        .card { background-color: #e0e0e0; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .receipt-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: block; text-align: center; text-decoration: none; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <h1>Transaction History</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Date</th>
-                <th>Employee ID</th>
-                <th>Supplier ID</th>
-                <th>Total Amount</th>
-            </tr>
-        </thead>
-        <tbody id="transaction-table">
-        </tbody>
-    </table>
 
-    <script>
-        const supabaseUrl = "https://vdefkqccbueaoylrlsqx.supabase.co";
-        const supabaseKey = "YOUR_SUPABASE_KEY";
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+<!-- Navbar -->
+<div class="w3-top">
+    <div class="w3-bar w3-card">
+        <a href="#" class="w3-bar-item w3-button"><b>Shell</b> Gas Station</a>
+        <a href="index.html" class="w3-bar-item w3-button w3-right">Home</a>
+    </div>
+</div>
 
-        async function fetchTransactions() {
-            const { data, error } = await supabase
-                .from("Orders")
-                .select("orderID, OrderDate, EmployeeID, SupplierID, TotalAmount")
-                .order("OrderDate", { ascending: false });
+<!-- Transaction Details -->
+<div class="w3-content w3-padding content" style="max-width:600px">
+    <h2 class="w3-margin-top">Transaction Summary</h2>
+    <div class="card">
+        <label for="gasType"><strong>Gas Type:</strong></label>
+        <select id="gasType" class="w3-input w3-border">
+            <option value="1">Premium Gas - ₱50.00</option>
+            <option value="2">Regular Gas - ₱40.00</option>
+            <option value="3">Diesel - ₱35.00</option>
+        </select>
 
-            if (error) {
-                console.error("Error fetching transactions:", error);
-                return;
-            }
+        <label for="quantity"><strong>Quantity (liters):</strong></label>
+        <input type="number" id="quantity" class="w3-input w3-border" min="1" value="1">
 
-            const tableBody = document.getElementById("transaction-table");
-            tableBody.innerHTML = "";
-            data.forEach(order => {
-                const row = `<tr>
-                    <td>${order.orderID}</td>
-                    <td>${new Date(order.OrderDate).toLocaleString()}</td>
-                    <td>${order.EmployeeID}</td>
-                    <td>${order.SupplierID}</td>
-                    <td>$${order.TotalAmount.toFixed(2)}</td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-        }
+        <label for="branch"><strong>Branch:</strong></label>
+        <input type="text" id="branch" class="w3-input w3-border" value="Branch A">
 
-        fetchTransactions();
-    </script>
+        <p><strong>Total Cost:</strong> ₱<span id="totalAmount">0.00</span></p>
+    </div>
+    <button class="receipt-btn" onclick="proceedToReceipt()">Proceed to Receipt</button>
+</div>
+
+<script>
+    const gasPrices = {
+        1: 50.00, // Premium Gas
+        2: 40.00, // Regular Gas
+        3: 35.00  // Diesel
+    };
+
+    // Calculate total cost when quantity changes
+    document.getElementById("quantity").addEventListener("input", function() {
+        const gasType = document.getElementById("gasType").value;
+        const quantity = parseFloat(document.getElementById("quantity").value);
+        const totalAmount = gasPrices[gasType] * quantity;
+        document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
+    });
+
+    // Redirect to receipt.html with selected data
+    function proceedToReceipt() {
+        const gasType = document.getElementById("gasType").value;
+        const quantity = document.getElementById("quantity").value;
+        const branch = document.getElementById("branch").value;
+        const totalAmount = document.getElementById("totalAmount").textContent;
+
+        // Redirect to receipt.html with query parameters
+        window.location.href = `receipt.html?gasType=${gasType}&quantity=${quantity}&branch=${branch}&totalAmount=${totalAmount}`;
+    }
+</script>
+
 </body>
 </html>
-

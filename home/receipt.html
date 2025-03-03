@@ -4,12 +4,13 @@
     <title>Order Receipt - Shell Gas Station</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
         .w3-bar { background-color: #d50000 !important; color: white; }
         .w3-button { color: white !important; }
-        .content { flex: 1; padding: 60px 20px 20px; text-align: center; }
+        .content { flex: 1; padding: 60px 20px 20px; }
         .card { background-color: #e0e0e0; padding: 20px; border-radius: 10px; margin-top: 20px; }
         .confirm-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
     </style>
@@ -20,24 +21,25 @@
 <div class="w3-top">
     <div class="w3-bar w3-card">
         <a href="#" class="w3-bar-item w3-button"><b>Shell</b> Gas Station</a>
-        <a href="#logout" class="w3-bar-item w3-button w3-right">Logout</a>
+        <a href="index.html" class="w3-bar-item w3-button w3-right">Home</a>
     </div>
 </div>
 
-<!-- Receipt Page -->
+<!-- Receipt -->
 <div class="w3-content w3-padding content" style="max-width:600px">
     <h2 class="w3-margin-top">Order Receipt</h2>
-    <p>Thank you for your order. Below is your receipt.</p>
+    <p>Thank you for your order. Here are the details:</p>
 
     <div class="card">
-        <h3>Receipt Details</h3>
-        <p><strong>Gas Type:</strong> <span id="receiptGasType"></span></p>
-        <p><strong>Quantity:</strong> <span id="receiptQuantity"></span> liters</p>
-        <p><strong>Branch:</strong> <span id="receiptBranch"></span></p>
-        <p><strong>Order Number:</strong> <span id="orderNumber"></span></p>
-
-        <button class="confirm-btn w3-margin-top" onclick="confirmReceipt()">Confirm Receipt</button>
+        <p><strong>Gas Type:</strong> <span id="gasTypeName"></span></p>
+        <p><strong>Quantity:</strong> <span id="quantity"></span> liters</p>
+        <p><strong>Price per Liter:</strong> ₱<span id="pricePerLiter"></span></p>
+        <p><strong>Total Cost:</strong> ₱<span id="totalAmount"></span></p>
+        <p><strong>Branch:</strong> <span id="branch"></span></p>
+        <p><strong>Supplier:</strong> <span id="supplier"></span></p>
     </div>
+
+    <button class="confirm-btn w3-margin-top" onclick="finalizeOrder()">Confirm Order</button>
 </div>
 
 <!-- Footer -->
@@ -46,27 +48,83 @@
 </footer>
 
 <script>
-    // Retrieve order details from URL
+    const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";  
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
     const urlParams = new URLSearchParams(window.location.search);
-    const gasType = urlParams.get('gasType');
+    const gasTypeID = urlParams.get('gasType');
     const quantity = urlParams.get('quantity');
     const branch = urlParams.get('branch');
+    const supplierID = urlParams.get('supplierID');
+    const totalAmount = urlParams.get('totalAmount');
 
-    // Generate a random order number
-    const orderNumber = Math.floor(Math.random() * 900000) + 100000;
+    document.getElementById("quantity").textContent = quantity;
+    document.getElementById("totalAmount").textContent = totalAmount;
+    document.getElementById("branch").textContent = branch;
 
-    // Display receipt details
-    document.getElementById("receiptGasType").textContent = gasType;
-    document.getElementById("receiptQuantity").textContent = quantity;
-    document.getElementById("receiptBranch").textContent = branch;
-    document.getElementById("orderNumber").textContent = orderNumber;
+    async function fetchGasTypeName() {
+        const { data, error } = await supabase
+            .from("Products")
+            .select("product_name, price")
+            .eq("productID", gasTypeID)
+            .single();
 
-    function confirmReceipt() {
-        alert("Receipt confirmed. Redirecting to Employee Page...");
-        window.location.href = "employeepage.html"; // Redirect to employee page
+        if (error) {
+            console.error("Error fetching gas type:", error.message);
+            document.getElementById("gasTypeName").textContent = "Unknown";
+            return;
+        }
+
+        document.getElementById("gasTypeName").textContent = data.product_name;
+        document.getElementById("pricePerLiter").textContent = data.price;
     }
+
+    async function fetchSupplierName() {
+        const { data, error } = await supabase
+            .from("Supplier")
+            .select("supplier_name")
+            .eq("supplierID", supplierID)
+            .single();
+
+        if (error) {
+            console.error("Error fetching supplier:", error.message);
+            document.getElementById("supplier").textContent = "Unknown";
+            return;
+        }
+
+        document.getElementById("supplier").textContent = data.supplier_name;
+    }
+
+    async function finalizeOrder() {
+        const { data, error } = await supabase
+            .from("Orders")
+            .insert([
+                { 
+                    productID: gasTypeID, 
+                    quantity: quantity, 
+                    total_price: totalAmount, 
+                    branch: branch, 
+                    supplierID: supplierID
+                }
+            ]);
+
+        if (error) {
+            console.error("Error saving order:", error.message);
+            alert("Order failed. Please try again.");
+        } else {
+            alert("Order successfully recorded!");
+            window.location.href = "employeepage.html";  // ✅ Redirects to employeepage.html
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchGasTypeName();
+        fetchSupplierName();
+    });
 </script>
 
 </body>
 </html>
+
 

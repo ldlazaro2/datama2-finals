@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Order Receipt - Shell Gas Station</title>
+    <title>Receipt - Shell Gas Station</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
@@ -25,100 +24,44 @@
     </div>
 </div>
 
-<!-- Receipt -->
+<!-- Receipt Details -->
 <div class="w3-content w3-padding content" style="max-width:600px">
-    <h2 class="w3-margin-top">Order Receipt</h2>
-    <p>Thank you for your order. Here are the details:</p>
-
+    <h2 class="w3-margin-top">Receipt</h2>
     <div class="card">
-        <p><strong>Gas Type:</strong> <span id="gasTypeName"></span></p>
-        <p><strong>Quantity:</strong> <span id="quantity"></span> liters</p>
-        <p><strong>Price per Liter:</strong> ₱<span id="pricePerLiter"></span></p>
-        <p><strong>Total Cost:</strong> ₱<span id="totalAmount"></span></p>
-        <p><strong>Supplier:</strong> <span id="supplier"></span></p>
+        <p><strong>Gas Type:</strong> <span id="gasType"></span></p>
+        <p><strong>Quantity (liters):</strong> <span id="quantity"></span></p>
+        <p><strong>Branch:</strong> <span id="branch"></span></p>
+        <p><strong>Total Amount:</strong> ₱<span id="totalAmount"></span></p>
+        
+        <label for="supplier"><strong>Supplier:</strong></label>
+        <select id="supplier" class="w3-select w3-border">
+            <option value="Petron Fuel Supplies">Petron Fuel Supplies - 123 Main St, Manila</option>
+            <option value="Shell Energy Distributors">Shell Energy Distributors - 456 Gasoline Ave, Quezon City</option>
+            <option value="Chevron Fuel Solutions">Chevron Fuel Solutions - 789 Oil Rd, Makati</option>
+            <option value="Total Energy Providers">Total Energy Providers - 101 Diesel St, Pasig</option>
+            <option value="Phoenix Petroleum">Phoenix Petroleum - 202 LPG Blvd, Cebu City</option>
+            <option value="Seaoil Gasoline Services">Seaoil Gasoline Services - 303 Octane Rd, Davao City</option>
+            <option value="Unioil Fuel Corp">Unioil Fuel Corp - 404 Petrochem St, Taguig</option>
+            <option value="PTT Philippines">PTT Philippines - 505 Crude Oil Dr, Baguio</option>
+            <option value="Flying V Fuel Co.">Flying V Fuel Co. - 606 Biofuel Ln, Iloilo City</option>
+            <option value="Gulf Oil PH">Gulf Oil PH - 707 Ethanol St, Bacolod</option>
+        </select>
     </div>
-
-    <button class="confirm-btn w3-margin-top" onclick="finalizeOrder()">Confirm Order</button>
+    <button class="confirm-btn w3-margin-top" onclick="confirmOrder()">Confirm Order</button>
 </div>
 
-<!-- Footer -->
-<footer class="w3-center w3-black w3-padding-16">
-    <p>Shell Gas Station | Powered by Shell</p>
-</footer>
-
 <script>
-    const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";  
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
+    // Get query parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const gasTypeID = urlParams.get('gasType');
-    const quantity = urlParams.get('quantity');
-    const branch = urlParams.get('branch');
-    const totalAmount = urlParams.get('totalAmount');
+    document.getElementById("gasType").textContent = urlParams.get("gasType");
+    document.getElementById("quantity").textContent = urlParams.get("quantity");
+    document.getElementById("branch").textContent = urlParams.get("branch");
+    document.getElementById("totalAmount").textContent = urlParams.get("totalAmount");
 
-    const gasPrices = {
-        1: 50.00, // Premium Gas
-        2: 40.00, // Regular Gas
-        3: 35.00  // Diesel
-    };
-
-    document.getElementById("quantity").textContent = quantity;
-    document.getElementById("totalAmount").textContent = totalAmount;
-    document.getElementById("branch").textContent = branch;
-    document.getElementById("pricePerLiter").textContent = gasPrices[gasTypeID].toFixed(2);
-
-    async function fetchGasTypeName() {
-        const gasTypes = {
-            1: "Premium Gas",
-            2: "Regular Gas",
-            3: "Diesel"
-        };
-        document.getElementById("gasTypeName").textContent = gasTypes[gasTypeID];
+    function confirmOrder() {
+        alert("Order confirmed!");
+        window.location.href = "employeepage.html";
     }
-
-    async function fetchRandomSupplier() {
-        const { data, error } = await supabase
-            .from("Supplier")
-            .select("supplier_name")
-            .limit(1)
-            .order("supplierID", { ascending: false });
-
-        if (error) {
-            console.error("Error fetching supplier:", error.message);
-            document.getElementById("supplier").textContent = "Unknown";
-            return;
-        }
-
-        document.getElementById("supplier").textContent = data[0].supplier_name;
-    }
-
-    async function finalizeOrder() {
-        const { data, error } = await supabase
-            .from("Orders")
-            .insert([
-                { 
-                    productID: gasTypeID, 
-                    quantity: quantity, 
-                    total_price: totalAmount, 
-                    branch: branch, 
-                    supplierID: 1 // Hardcoded for now
-                }
-            ]);
-
-        if (error) {
-            console.error("Error saving order:", error.message);
-            alert("Order failed. Please try again.");
-        } else {
-            alert("Order successfully recorded!");
-            window.location.href = "employeepage.html";  // ✅ Redirects to employeepage.html
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        fetchGasTypeName();
-        fetchRandomSupplier();
-    });
 </script>
 
 </body>

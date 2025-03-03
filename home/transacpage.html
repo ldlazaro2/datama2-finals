@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Employee Order - Shell Gas Station</title>
+    <title>Transaction Page - Shell Gas Station</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,7 +12,7 @@
         .w3-button { color: white !important; }
         .content { flex: 1; padding: 60px 20px 20px; }
         .card { background-color: #e0e0e0; padding: 20px; border-radius: 10px; margin-top: 20px; }
-        .confirm-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .receipt-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: block; text-align: center; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -21,116 +21,61 @@
 <div class="w3-top">
     <div class="w3-bar w3-card">
         <a href="#" class="w3-bar-item w3-button"><b>Shell</b> Gas Station</a>
-        <a href="#logout" class="w3-bar-item w3-button w3-right">Logout</a>
+        <a href="index.html" class="w3-bar-item w3-button w3-right">Home</a>
     </div>
 </div>
 
-<!-- Order Form -->
+<!-- Transaction Details -->
 <div class="w3-content w3-padding content" style="max-width:600px">
-    <h2 class="w3-margin-top">Place an Order</h2>
-    <p>Enter the details of your gas order.</p>
-
+    <h2 class="w3-margin-top">Transaction Summary</h2>
     <div class="card">
-        <label><strong>Gas Type:</strong></label>
-        <select class="w3-select w3-border" id="gasType" onchange="updatePrice()">
-            <option value="" disabled selected>Loading gas types...</option>
-        </select>
-
-        <label><strong>Price per Liter:</strong></label>
-        <p id="priceDisplay">₱0.00</p>
-
-        <label><strong>Quantity (Liters):</strong></label>
-        <input class="w3-input w3-border" type="number" id="quantity" placeholder="Enter quantity">
-
-        <label><strong>Branch:</strong></label>
-        <input class="w3-input w3-border" type="text" id="branch" placeholder="Enter branch">
-
-        <label><strong>Supplier:</strong></label>
-        <select class="w3-select w3-border" id="supplier">
-            <option value="" disabled selected>Loading suppliers...</option>
-        </select>
-
-        <button class="confirm-btn w3-margin-top" onclick="submitOrder()">Submit Order</button>
+        <p><strong>Gas Type:</strong> <span id="gasTypeName">Loading...</span></p>
+        <p><strong>Supplier:</strong> <span id="supplierName">Loading...</span></p>
+        <p><strong>Total Cost:</strong> ₱<span id="totalAmount">Loading...</span></p>
     </div>
+    <a href="receipt.html" class="receipt-btn">Proceed to Receipt</a>
 </div>
-
-<!-- Footer -->
-<footer class="w3-center w3-black w3-padding-16">
-    <p>Shell Gas Station | Powered by Shell</p>
-</footer>
 
 <script>
-    const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE"; 
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabase = supabase.createClient("https://nyfcjxeebjzejsutbgub.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE");
 
-    async function loadGasTypes() {
-        const { data, error } = await supabase.from("Products").select("productID, product_name, price");
-        if (error) return console.error("Error fetching gas types:", error.message);
+    async function loadLatestOrder() {
+        const { data, error } = await supabase
+            .from("Orders")
+            .select("productID, total_price, supplierID")
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single();
 
-        const gasTypeSelect = document.getElementById("gasType");
-        gasTypeSelect.innerHTML = '<option value="" disabled selected>Select Gas Type</option>';
-        
-        data.forEach(product => {
-            const option = document.createElement("option");
-            option.value = product.productID;
-            option.textContent = `${product.product_name} - ₱${product.price}`;
-            option.setAttribute("data-price", product.price);
-            gasTypeSelect.appendChild(option);
-        });
-    }
-
-    function updatePrice() {
-        const gasTypeSelect = document.getElementById("gasType");
-        const selectedOption = gasTypeSelect.options[gasTypeSelect.selectedIndex];
-        const price = selectedOption.getAttribute("data-price");
-        document.getElementById("priceDisplay").textContent = `₱${price} per liter`;
-    }
-
-    async function loadSuppliers() {
-        const { data, error } = await supabase.from("Supplier").select("supplierID, supplier_name");
-        if (error) return console.error("Error fetching suppliers:", error.message);
-
-        const supplierSelect = document.getElementById("supplier");
-        supplierSelect.innerHTML = '<option value="" disabled selected>Select Supplier</option>';
-        
-        data.forEach(supplier => {
-            const option = document.createElement("option");
-            option.value = supplier.supplierID;
-            option.textContent = supplier.supplier_name;
-            supplierSelect.appendChild(option);
-        });
-    }
-
-    async function submitOrder() {
-        const gasTypeID = document.getElementById("gasType").value;
-        const quantity = parseInt(document.getElementById("quantity").value);
-        const branch = document.getElementById("branch").value;
-        const supplierID = document.getElementById("supplier").value;
-        const pricePerLiter = parseFloat(document.getElementById("gasType").selectedOptions[0].getAttribute("data-price"));
-        const totalAmount = (quantity * pricePerLiter).toFixed(2);
-
-        if (!gasTypeID || !quantity || !branch || !supplierID) {
-            alert("Please fill in all fields.");
+        if (error) {
+            console.error("Error loading order:", error.message);
             return;
         }
 
-        let { data: product, error: stockError } = await supabase.from("Products").select("stocks").eq("productID", gasTypeID).single();
-        if (stockError) return console.error("Error fetching stock:", stockError.message);
-        if (product.stocks < quantity) return alert("Not enough stock available!");
+        // Fetch gas type name
+        const { data: productData } = await supabase
+            .from("Products")
+            .select("product_name")
+            .eq("productID", data.productID)
+            .single();
+        
+        document.getElementById("gasTypeName").textContent = productData ? productData.product_name : "Unknown";
+        document.getElementById("totalAmount").textContent = data.total_price;
 
-        const newStock = product.stocks - quantity;
-        await supabase.from("Products").update({ stocks: newStock }).eq("productID", gasTypeID);
-
-        window.location.href = `receipt.html?gasType=${encodeURIComponent(gasTypeID)}&quantity=${encodeURIComponent(quantity)}&branch=${encodeURIComponent(branch)}&supplierID=${encodeURIComponent(supplierID)}&totalAmount=${encodeURIComponent(totalAmount)}`;
+        // Fetch supplier name
+        const { data: supplierData } = await supabase
+            .from("Supplier")
+            .select("supplier_name")
+            .eq("supplierID", data.supplierID)
+            .single();
+        
+        document.getElementById("supplierName").textContent = supplierData ? supplierData.supplier_name : "Unknown";
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        loadGasTypes();
-        loadSuppliers();
-    });
+    document.addEventListener("DOMContentLoaded", loadLatestOrder);
 </script>
 
 </body>
 </html>
+
 

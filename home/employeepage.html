@@ -9,14 +9,10 @@
         body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
         .w3-bar { background-color: #d50000 !important; color: white; }
         .w3-button { color: white !important; }
-        .content { flex: 1; padding: 60px 20px 20px; } /* Increased top padding to prevent overlap */
+        .content { flex: 1; padding: 60px 20px 20px; }
         .card { background-color: #e0e0e0; padding: 20px; border-radius: 10px; margin-top: 20px; }
         footer { margin-top: auto; }
-        .gas-price { font-size: 1.2em; font-weight: bold; color: #d50000; }
-        .branch-select { margin-bottom: 20px; }
-        .order-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-        .order-form { margin-top: 20px; }
-        .order-form input, .order-form select { margin-bottom: 10px; }
+        .order-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: block; text-align: center; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -32,42 +28,12 @@
 <!-- Page Content -->
 <div class="w3-content w3-padding content" style="max-width:1200px">
     <h2 class="w3-margin-top">Shell Gas Station Employee Portal</h2>
-    <p>View gas prices and order stock below.</p>
+    <p>Manage orders and transactions below.</p>
 
-    <!-- Gas Prices Section -->
+    <!-- Order Button -->
     <div class="card">
-        <h3>Current Gas Prices (PHP)</h3>
-        <div class="gas-price">
-            <p>Unleaded: ₱60.50 per liter</p>
-            <p>Premium: ₱65.75 per liter</p>
-            <p>Diesel: ₱55.25 per liter</p>
-        </div>
-    </div>
-
-    <!-- Order Gas Stock Section -->
-    <div class="card order-form">
-        <h3>Order Gas Stock</h3>
-        <form id="orderForm">
-            <label for="gasType">Gas Type:</label>
-            <select id="gasType" class="w3-select w3-border" required>
-                <option value="unleaded">Unleaded</option>
-                <option value="premium">Premium</option>
-                <option value="diesel">Diesel</option>
-            </select>
-
-            <label for="quantity">Quantity (liters):</label>
-            <input type="number" id="quantity" class="w3-input w3-border" min="1" required>
-
-            <label for="branch">Branch:</label>
-            <select id="branch" class="w3-select w3-border" required>
-                <option value="main">Main Branch</option>
-                <option value="branchA">Branch A</option>
-                <option value="branchB">Branch B</option>
-                <option value="branchC">Branch C</option>
-            </select>
-
-            <button type="submit" class="order-btn">Place Order</button>
-        </form>
+        <h3>Order Supplies</h3>
+        <a href="transacpage.html" class="order-btn">Order</a>
     </div>
 </div>
 
@@ -75,19 +41,6 @@
 <footer class="w3-center w3-black w3-padding-16">
     <p>Shell Gas Station | Powered by Shell</p>
 </footer>
-
-<script>
-    document.getElementById("orderForm").addEventListener("submit", function(event) {
-        event.preventDefault();
-
-        const gasType = document.getElementById("gasType").value;
-        const quantity = document.getElementById("quantity").value;
-        const branch = document.getElementById("branch").value;
-
-        // Redirect to transacpage.html with order details as query parameters
-        window.location.href = `transacpage.html?gasType=${gasType}&quantity=${quantity}&branch=${branch}`;
-    });
-</script>
 
 </body>
 </html>

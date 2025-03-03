@@ -162,8 +162,8 @@ async function deleteEmployee(id) {
 
 /////////////////////////////////
 async function loadEmployees() {
-    const { data, error } = await supabase.from('employee').select('*');
-    .from('employee')
+    const { data, error } = await supabase
+        .from('employee')
         .select('*')
         .order('employeeid', { ascending: true });
 
@@ -189,8 +189,8 @@ async function loadEmployees() {
             <td>${emp.emp_starttime}</td>
             <td>${emp.emp_endtime}</td>
             <td>
-                <button class="w3-button w3-small w3-blue" onclick="editEmployee(${emp.employee_id || emp.id})">Edit</button>
-                <button class="w3-button w3-small w3-red" onclick="deleteEmployee(${emp.employee_id || emp.id})">Delete</button>
+                <button class="w3-button w3-small w3-blue" onclick="editEmployee(${emp.employeeid || emp.id})">Edit</button>
+                <button class="w3-button w3-small w3-red" onclick="deleteEmployee(${emp.employeeid || emp.id})">Delete</button>
             </td>`;
     });
 }

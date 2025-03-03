@@ -76,6 +76,8 @@
 
 async function editEmployee(id) {
     console.log("Editing employee with ID:", id); // Debugging log
+    console.log("Employee Data:", data);
+    console.log("emp_starttime:", data?.emp_starttime);
 
     const { data, error } = await supabase
         .from('employee')
@@ -105,7 +107,7 @@ async function editEmployee(id) {
     document.getElementById('edit_department').value = data.emp_department;
     document.getElementById('edit_role').value = data.emp_role;
     document.getElementById('edit_branch').value = data.emp_branch;
-    document.getElementById('edit_start_time').value = data.emp_starttime.split(" ")[1].substring(0, 5);
+    document.getElementById('edit_start_time').value = (data.emp_starttime?.split(" ")[1] || "").substring(0, 5);
     document.getElementById('edit_end_time').value = data.emp_endtime.split(" ")[1].substring(0, 5);
 
     // Show the modal

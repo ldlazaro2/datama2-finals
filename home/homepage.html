@@ -55,35 +55,39 @@
         loadEmployees();
     }
 }
-        async function loadEmployees() {
-            const { data, error } = await supabase.from('employees').select('*');
-            if (error) {
-                console.error('Error fetching employees:', error);
-                return;
-            }
+async function loadEmployees() {
+    console.log("Loading employees..."); // ✅ Debugging log
 
-            const tableBody = document.getElementById('employeeTableBody');
-            tableBody.innerHTML = ''; // Clear table before adding updated rows
+    const { data, error } = await supabase.from('employees').select('*');
+    
+    if (error) {
+        console.error("Error fetching employees:", error);
+        return;
+    }
 
-            data.forEach(emp => {
-                const row = `<tr>
-                    <td>${emp.id}</td>
-                    <td>${emp.name}</td>
-                    <td>${emp.department}</td>
-                    <td>${emp.role}</td>
-                    <td>${emp.branch}</td>
-                    <td>${emp.start_time}</td>
-                    <td>${emp.end_time}</td>
-                    <td>
-                        <button class="w3-button w3-small w3-blue">Edit</button>
-                        <button class="w3-button w3-small w3-red">Delete</button>
-                    </td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-        }
+    console.log("Employee data received:", data); // ✅ Debugging log
 
-        document.addEventListener('DOMContentLoaded', loadEmployees);
+    const tableBody = document.getElementById('employeeTableBody');
+    tableBody.innerHTML = ''; // Clear table before adding updated rows
+
+    data.forEach(emp => {
+        let newRow = tableBody.insertRow();
+        newRow.innerHTML = `<td>${emp.id}</td>
+                            <td>${emp.name}</td>
+                            <td>${emp.department}</td>
+                            <td>${emp.role}</td>
+                            <td>${emp.branch}</td>
+                            <td>${emp.start_time}</td>
+                            <td>${emp.end_time}</td>
+                            <td>
+                                <button class="w3-button w3-small w3-blue">Edit</button>
+                                <button class="w3-button w3-small w3-red">Delete</button>
+                            </td>`;
+    });
+}
+
+// Call function when page loads
+document.addEventListener("DOMContentLoaded", loadEmployees);
     </script>
 </head>
 <body>

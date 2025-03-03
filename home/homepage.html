@@ -38,7 +38,8 @@
         return;
     }
 
-    const name = document.getElementById('name').value;
+    const firstname = document.getElementById('firstname').value;
+    const lastname = document.getElementById('lastname').value;
     const department = document.getElementById('department').value;
     const role = document.getElementById('role').value;
     const branch = document.getElementById('branch').value;
@@ -53,7 +54,8 @@
     const { data, error: insertError } = await supabase
         .from('employee')
         .insert([{ 
-            emp_name: name, 
+            emp_firstname: firstname, 
+            emp_lastname: lastname, 
             emp_department: department, 
             emp_role: role, 
             emp_branch: branch, 
@@ -90,7 +92,8 @@ async function editEmployee(id) {
 
     // Update input fields with new column names
     document.getElementById('edit_id').value = data.employee_id;
-    document.getElementById('edit_name').value = data.emp_name;
+    document.getElementById('edit_firstname').value = data.emp_firstname;
+    document.getElementById('edit_lastname').value = data.emp_lastname;
     document.getElementById('edit_department').value = data.emp_department;
     document.getElementById('edit_role').value = data.emp_role;
     document.getElementById('edit_branch').value = data.emp_branch;
@@ -107,7 +110,8 @@ async function updateEmployee(event) {
 
     let id = document.getElementById('edit_id').value;
     let updatedData = {
-        emp_name: document.getElementById('edit_name').value,
+        emp_firstname: document.getElementById('edit_firstname').value,
+        emp_lastname: document.getElementById('edit_lastname').value,
         emp_department: document.getElementById('edit_department').value,
         emp_role: document.getElementById('edit_role').value,
         emp_branch: document.getElementById('edit_branch').value,
@@ -170,7 +174,8 @@ async function loadEmployees() {
         let newRow = tableBody.insertRow();
         newRow.innerHTML = `
             <td>${emp.employee_id || emp.id}</td>  
-            <td>${emp.emp_name}</td>
+            <td>${emp.emp_firstname}</td>
+            <td>${emp.emp_lastname}</td>
             <td>${emp.emp_department}</td>
             <td>${emp.emp_role}</td>
             <td>${emp.emp_branch}</td>
@@ -218,7 +223,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         <table class="w3-table w3-bordered">
             <tr>
                 <th>ID</th>
-                <th>Name</th>
+                <th>First Name</th>
+                <th>Last Name</th>
                 <th>Department</th>
                 <th>Role</th>
                 <th>Branch</th>
@@ -243,8 +249,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         </header>
         <div class="w3-container">
             <form id="addEmployeeForm" onsubmit="addEmployee(event)">
-                <label>Name</label>
-                <input class="w3-input w3-border" type="text" id="name" required>
+                <label>First Name</label>
+                <input class="w3-input w3-border" type="text" id="firstname" required>
+                <label>Last Name</label>
+                <input class="w3-input w3-border" type="text" id="lastname" required>
                 <label>Department</label>
                 <input class="w3-input w3-border" type="text" id="department" required>
                 <label>Role</label>

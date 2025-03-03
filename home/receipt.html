@@ -55,18 +55,16 @@
     const urlParams = new URLSearchParams(window.location.search);
     const gasTypeID = urlParams.get('gasType');
     const quantity = urlParams.get('quantity');
-    const branch = urlParams.get('branch');
     const supplierID = urlParams.get('supplierID');
     const totalAmount = urlParams.get('totalAmount');
 
     document.getElementById("quantity").textContent = quantity;
     document.getElementById("totalAmount").textContent = totalAmount;
-    document.getElementById("branch").textContent = branch;
 
     async function fetchGasTypeName() {
     const { data, error } = await supabase
-        .from("Products")
-        .select("product_name, price")
+        .from("product")
+        .select("productName, price")
         .eq("productID", gasTypeID)
         .single();
 
@@ -89,7 +87,7 @@
             { 
                 productID: gasTypeID, 
                 quantity: quantity, 
-                total_price: (document.getElementById("pricePerLiter").textContent * quantity).toFixed(2),
+                price: (document.getElementById("pricePerLiter").textContent * quantity).toFixed(2),
                 supplierID: supplierID
             }
         ]);

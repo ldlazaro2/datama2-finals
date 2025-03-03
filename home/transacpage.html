@@ -47,8 +47,8 @@ const supabase = supabase.createClient(
 document.addEventListener("DOMContentLoaded", function() {
     async function loadLatestOrder() {
         const { data, error } = await supabase
-            .from("Orders")
-            .select("productID, total_price, supplierID")
+            .from("orders")
+            .select("productID, price, supplierID")
             .order("created_at", { ascending: false })
             .limit(1)
             .single();
@@ -60,8 +60,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Fetch gas type name
         const { data: productData, error: productError } = await supabase
-            .from("Products")  // ✅ Fix table name (Previously "Product")
-            .select("product_name") 
+            .from("product")  // ✅ Fix table name (Previously "Product")
+            .select("productName") 
             .eq("productID", data.productID)
             .single();
         

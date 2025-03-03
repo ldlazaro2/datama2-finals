@@ -154,31 +154,22 @@ async function deleteEmployee(id) {
 
 /////////////////////////////////
 async function loadEmployees() {
-    const { data, error } = await supabase.from('employee').select('*'); 
-
-    console.log("🔍 Employees loaded:", data, error); // Debug log
+    const { data, error } = await supabase.from('employee').select('*');
 
     if (error) {
-        console.error("⚠️ Error fetching employees:", error);
+        console.error("Error fetching employees:", error);
         return;
     }
+
+    console.log("Employees loaded:", data); // Debugging to check the structure
 
     let tableBody = document.getElementById('employeeTableBody');
-    if (!tableBody) {
-        console.error("⚠️ Element `employeeTableBody` not found!");
-        return;
-    }
-
-    tableBody.innerHTML = ""; // Clear table
-
-    if (data.length === 0) {
-        console.warn("⚠️ No employees found.");
-    }
+    tableBody.innerHTML = ""; // Clear previous entries
 
     data.forEach(emp => {
         let newRow = tableBody.insertRow();
         newRow.innerHTML = `
-            <td>${emp.employee_id}</td>
+            <td>${emp.employee_id || emp.id}</td>  
             <td>${emp.emp_name}</td>
             <td>${emp.emp_department}</td>
             <td>${emp.emp_role}</td>
@@ -186,8 +177,8 @@ async function loadEmployees() {
             <td>${emp.emp_starttime}</td>
             <td>${emp.emp_endtime}</td>
             <td>
-                <button class="w3-button w3-small w3-blue" onclick="editEmployee(${emp.employee_id})">Edit</button>
-                <button class="w3-button w3-small w3-red" onclick="deleteEmployee(${emp.employee_id})">Delete</button>
+                <button class="w3-button w3-small w3-blue" onclick="editEmployee(${emp.employee_id || emp.id})">Edit</button>
+                <button class="w3-button w3-small w3-red" onclick="deleteEmployee(${emp.employee_id || emp.id})">Delete</button>
             </td>`;
     });
 }

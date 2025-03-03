@@ -105,14 +105,14 @@ async function editEmployee(id) {
 
     // 🟢 Fix emp_starttime issue
     if (data.emp_starttime) {
-        document.getElementById('edit_start_time').value = data.emp_starttime.split(" ")[1].substring(0, 5);
+        document.getElementById('edit_start_time').value = data.emp_starttime.split(" ")[1];
     } else {
         console.warn("emp_starttime is missing for this employee.");
     }
 
     // 🟢 Fix emp_endtime issue
     if (data.emp_endtime) {
-        document.getElementById('edit_end_time').value = data.emp_endtime.split(" ")[1].substring(0, 5);
+        document.getElementById('edit_end_time').value = data.emp_endtime.split(" ")[1];
     } else {
         console.warn("emp_endtime is missing for this employee.");
     }

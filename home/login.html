@@ -52,28 +52,35 @@
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     document.addEventListener("DOMContentLoaded", function () {
-        // Ensure the event listener is added after the page loads
-        document.getElementById("login-form").addEventListener("submit", async function (event) {
-            event.preventDefault(); // Prevent form from refreshing the page
-            
-            const email = document.getElementById("login-email").value;
-            const password = document.getElementById("login-password").value;
+        console.log("Script Loaded Successfully!");
 
-            console.log("Attempting login..."); // Debugging step
+        const loginForm = document.getElementById("login-form");
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (loginForm) {
+            loginForm.addEventListener("submit", async function (event) {
+                event.preventDefault();
 
-            if (error) {
-                console.error("Login failed:", error.message);
-                alert("Login failed: " + error.message);
-            } else {
-                console.log("Login successful!", data);
-                alert("Login successful!");
+                console.log("Login button clicked!");
 
-                // Redirect to homepage only if login is successful
-                window.location.href = "homepage.html";
-            }
-        });
+                const email = document.getElementById("login-email").value;
+                const password = document.getElementById("login-password").value;
+
+                console.log("Attempting login for:", email);
+
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+                if (error) {
+                    console.error("Login failed:", error.message);
+                    alert("Login failed: " + error.message);
+                } else {
+                    console.log("Login successful!", data);
+                    alert("Login successful!");
+                    window.location.href = "homepage.html";
+                }
+            });
+        } else {
+            console.error("Login form not found!");
+        }
     });
 </script>
 

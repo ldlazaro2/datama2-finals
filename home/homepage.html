@@ -26,28 +26,35 @@
         }
 
         async function addEmployee(event) {
-            event.preventDefault();
-            const name = document.getElementById('name').value;
-            const department = document.getElementById('department').value;
-            const role = document.getElementById('role').value;
-            const branch = document.getElementById('branch').value;
-            const start_time = document.getElementById('start_time').value;
-            const end_time = document.getElementById('end_time').value;
-            
-            const { data, error } = await supabase.from('employees').insert([
-                { name, department, role, branch, start_time, end_time }
-            ]);
-            
-            if (error) {
-                alert('Error adding employee: ' + error.message);
-            } else {
-                alert('Employee added successfully!');
-                document.getElementById('addEmployeeForm').reset();
-                document.getElementById('addEmployeeModal').style.display = 'none';
-                loadEmployees(); // Reload employee list after adding
-            }
-        }
+    event.preventDefault();
+    
+    // Check if user is authenticated
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (!user) {
+        alert("You must be logged in to add an employee.");
+        return;
+    }
 
+    const name = document.getElementById('name').value;
+    const department = document.getElementById('department').value;
+    const role = document.getElementById('role').value;
+    const branch = document.getElementById('branch').value;
+    const start_time = document.getElementById('start_time').value;
+    const end_time = document.getElementById('end_time').value;
+    
+    const { data, error: insertError } = await supabase
+        .from('employees')
+        .insert([{ name, department, role, branch, start_time, end_time }]);
+
+    if (insertError) {
+        alert('Error adding employee: ' + insertError.message);
+    } else {
+        alert('Employee added successfully!');
+        document.getElementById('addEmployeeForm').reset();
+        document.getElementById('addEmployeeModal').style.display = 'none';
+        loadEmployees();
+    }
+}
         async function loadEmployees() {
             const { data, error } = await supabase.from('employees').select('*');
             if (error) {

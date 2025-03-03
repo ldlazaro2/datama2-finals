@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Shell Gas Checkout</title>
+    <title>Employee Order - Shell Gas Station</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -9,11 +9,9 @@
         body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
         .w3-bar { background-color: #d50000 !important; color: white; }
         .w3-button { color: white !important; }
-        .content { flex: 1; padding: 60px 20px 20px; } /* Increased top padding to prevent overlap */
+        .content { flex: 1; padding: 60px 20px 20px; }
         .card { background-color: #e0e0e0; padding: 20px; border-radius: 10px; margin-top: 20px; }
-        footer { margin-top: auto; }
-        .checkout-form { margin-bottom: 20px; }
-        .checkout-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .confirm-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -26,23 +24,22 @@
     </div>
 </div>
 
-<!-- Page Content -->
-<div class="w3-content w3-padding content" style="max-width:1200px">
-    <h2 class="w3-margin-top">Checkout</h2>
-    <p>Please enter your details to complete your order.</p>
+<!-- Order Form -->
+<div class="w3-content w3-padding content" style="max-width:600px">
+    <h2 class="w3-margin-top">Place an Order</h2>
+    <p>Enter the details of your gas order.</p>
 
-    <!-- Checkout Form -->
-    <div class="card checkout-form">
-        <h3>Order Details</h3>
-        <form id="checkoutForm">
-            <label for="name">Name:</label>
-            <input type="text" id="name" class="w3-input w3-border" required>
+    <div class="card">
+        <label><strong>Gas Type:</strong></label>
+        <input class="w3-input w3-border" type="text" id="gasType" placeholder="Enter gas type">
 
-            <label for="amount">Total Amount (PHP):</label>
-            <input type="number" id="amount" class="w3-input w3-border" required>
+        <label><strong>Quantity (Liters):</strong></label>
+        <input class="w3-input w3-border" type="number" id="quantity" placeholder="Enter quantity">
 
-            <button type="submit" class="checkout-btn">Confirm Payment</button>
-        </form>
+        <label><strong>Branch:</strong></label>
+        <input class="w3-input w3-border" type="text" id="branch" placeholder="Enter branch">
+
+        <button class="confirm-btn w3-margin-top" onclick="submitOrder()">Submit Order</button>
     </div>
 </div>
 
@@ -52,19 +49,20 @@
 </footer>
 
 <script>
-    // Retrieve branch from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const branch = urlParams.get('branch');
-    document.getElementById("branch").innerText = `Selected Branch: ${branch}`;
+    function submitOrder() {
+        // Get input values
+        const gasType = document.getElementById("gasType").value;
+        const quantity = document.getElementById("quantity").value;
+        const branch = document.getElementById("branch").value;
 
-    // Handle form submission
-    document.getElementById("checkoutForm").addEventListener("submit", function(event) {
-        event.preventDefault();
-        const name = document.getElementById("name").value;
-        const amount = document.getElementById("amount").value;
-        alert(`Thank you, ${name}! Your payment of ₱${amount} has been processed for ${branch}.`);
-        window.location.href = "customer.html"; // Redirect back to customer page
-    });
+        if (!gasType || !quantity || !branch) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        // Redirect to the receipt page with order details
+        window.location.href = `receipt.html?gasType=${gasType}&quantity=${quantity}&branch=${branch}`;
+    }
 </script>
 
 </body>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Receipt - Shell Gas Station</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
+        .w3-bar { background-color: #d50000 !important; color: white; }
+        .w3-button { color: white !important; }
+        .content { flex: 1; padding: 60px 20px 20px; text-align: center; }
+        .card { background-color: #e0e0e0; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .confirm-btn { background-color: #d50000; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+    <div class="w3-bar w3-card">
+        <a href="#" class="w3-bar-item w3-button"><b>Shell</b> Gas Station</a>
+        <a href="#logout" class="w3-bar-item w3-button w3-right">Logout</a>
+    </div>
+</div>
+
+<!-- Receipt Page -->
+<div class="w3-content w3-padding content" style="max-width:600px">
+    <h2 class="w3-margin-top">Order Receipt</h2>
+    <p>Thank you for your order. Below is your receipt.</p>
+
+    <div class="card">
+        <h3>Receipt Details</h3>
+        <p><strong>Gas Type:</strong> <span id="receiptGasType"></span></p>
+        <p><strong>Quantity:</strong> <span id="receiptQuantity"></span> liters</p>
+        <p><strong>Branch:</strong> <span id="receiptBranch"></span></p>
+        <p><strong>Order Number:</strong> <span id="orderNumber"></span></p>
+
+        <button class="confirm-btn w3-margin-top" onclick="confirmReceipt()">Confirm Receipt</button>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="w3-center w3-black w3-padding-16">
+    <p>Shell Gas Station | Powered by Shell</p>
+</footer>
+
+<script>
+    // Retrieve order details from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const gasType = urlParams.get('gasType');
+    const quantity = urlParams.get('quantity');
+    const branch = urlParams.get('branch');
+
+    // Generate a random order number
+    const orderNumber = Math.floor(Math.random() * 900000) + 100000;
+
+    // Display receipt details
+    document.getElementById("receiptGasType").textContent = gasType;
+    document.getElementById("receiptQuantity").textContent = quantity;
+    document.getElementById("receiptBranch").textContent = branch;
+    document.getElementById("orderNumber").textContent = orderNumber;
+
+    function confirmReceipt() {
+        alert("Receipt confirmed. Redirecting to Employee Page...");
+        window.location.href = "employeepage.html"; // Redirect to employee page
+    }
+</script>
+
+</body>
+</html>
+

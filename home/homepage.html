@@ -155,12 +155,14 @@ async function deleteEmployee(id) {
 
 /////////////////////////////////
 async function loadEmployees() {
-    const { data, error } = await supabase.from('employee').select('*'); // 🔹 Changed to 'employee'
+    const { data, error } = await supabase.from('employee').select('*'); // 🔹 Fetch employees
 
     if (error) {
         console.error("Error fetching employees:", error);
         return;
     }
+
+    console.log("Employees loaded:", data);  // 🔹 Debugging
 
     let tableBody = document.getElementById('employeeTableBody');
     tableBody.innerHTML = ""; // Clear table

@@ -30,51 +30,48 @@
 
         async function addEmployee(event) {
     event.preventDefault();
-
-    // Get the smallest missing ID
-    let { data: existingIds, error: fetchError } = await supabase
-        .from('employee')
-        .select('employeeid')
-        .order('employeeid', { ascending: true });
-
-    if (fetchError) {
-        console.error('Error fetching existing IDs:', fetchError.message);
+    
+    // Check if user is authenticated
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (!user) {
+        alert("You must be logged in to add an employee.");
         return;
     }
 
-    let newId = 1; // Default if table is empty
-    for (let i = 0; i < existingIds.length; i++) {
-        if (existingIds[i].employeeid !== i + 1) {
-            newId = i + 1;
-            break;
-        }
-        newId = existingIds.length + 1;
-    }
+    const firstname = document.getElementById('firstname').value;
+    const lastname = document.getElementById('lastname').value;
+    const department = document.getElementById('department').value;
+    const role = document.getElementById('role').value;
+    const branch = document.getElementById('branch').value;
+    const start_time = document.getElementById('start_time').value;
+    const end_time = document.getElementById('end_time').value;
 
-    // Now insert with this new ID
+    // 🔹 Convert time to full timestamp
+    const today = new Date().toISOString().split('T')[0];  // Get YYYY-MM-DD
+    const start_timestamp = `${today} ${start_time}:00`; // YYYY-MM-DD HH:MM:SS
+    const end_timestamp = `${today} ${end_time}:00`;     // YYYY-MM-DD HH:MM:SS
+
     const { data, error: insertError } = await supabase
         .from('employee')
         .insert([{ 
-            employeeid: newId, // Assign missing ID
-            emp_firstname: document.getElementById('firstname').value,
-            emp_lastname: document.getElementById('lastname').value,
-            emp_department: document.getElementById('department').value,
-            emp_role: document.getElementById('role').value,
-            emp_branch: document.getElementById('branch').value,
-            emp_starttime: document.getElementById('start_time').value + ":00",
-            emp_endtime: document.getElementById('end_time').value + ":00"
+            emp_firstname: firstname, 
+            emp_lastname: lastname, 
+            emp_department: department, 
+            emp_role: role, 
+            emp_branch: branch, 
+            emp_starttime: start_timestamp,  // 🔹 Use full timestamp
+            emp_endtime: end_timestamp      // 🔹 Use full timestamp
         }]);
 
     if (insertError) {
-        console.error('Error adding employee:', insertError.message);
-        alert('Failed to add employee.');
+        alert('Error adding employee: ' + insertError.message);
     } else {
         alert('Employee added successfully!');
         document.getElementById('addEmployeeForm').reset();
-        loadEmployees(); // Refresh the employee list
+        document.getElementById('addEmployeeModal').style.display = 'none';
+        loadEmployees();
     }
 }
-
 
 
 async function editEmployee(id) {

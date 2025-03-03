@@ -38,27 +38,39 @@
         return;
     }
 
-    const emp_name = document.getElementById('name').value;
-    const emp_department = document.getElementById('department').value;
-    const emp_role = document.getElementById('role').value;
-    const emp_branch = document.getElementById('branch').value;
-    const emp_starttime = document.getElementById('start_time').value;
-    const emp_endtime = document.getElementById('end_time').value;
-    
+    const name = document.getElementById('name').value;
+    const department = document.getElementById('department').value;
+    const role = document.getElementById('role').value;
+    const branch = document.getElementById('branch').value;
+    const start_time = document.getElementById('start_time').value;
+    const end_time = document.getElementById('end_time').value;
+
+    // 🔹 Convert time to full timestamp
+    const today = new Date().toISOString().split('T')[0];  // Get YYYY-MM-DD
+    const start_timestamp = `${today} ${start_time}:00`; // YYYY-MM-DD HH:MM:SS
+    const end_timestamp = `${today} ${end_time}:00`;     // YYYY-MM-DD HH:MM:SS
+
     const { data, error: insertError } = await supabase
-        .from('employee')  // ✅ Correct table name
-        .insert([{ emp_name, emp_department, emp_role, emp_branch, emp_starttime, emp_endtime }]);
+        .from('employee')
+        .insert([{ 
+            emp_name: name, 
+            emp_department: department, 
+            emp_role: role, 
+            emp_branch: branch, 
+            emp_starttime: start_timestamp,  // 🔹 Use full timestamp
+            emp_endtime: end_timestamp      // 🔹 Use full timestamp
+        }]);
 
     if (insertError) {
         alert('Error adding employee: ' + insertError.message);
-        console.error("Supabase error:", insertError);
     } else {
         alert('Employee added successfully!');
         document.getElementById('addEmployeeForm').reset();
         document.getElementById('addEmployeeModal').style.display = 'none';
-        loadEmployees(); // Refresh employee list
+        loadEmployees();
     }
 }
+
 
 async function editEmployee(id) {
     console.log("Editing employee with ID:", id);

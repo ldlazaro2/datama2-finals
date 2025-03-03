@@ -75,45 +75,52 @@
 
 
 async function editEmployee(id) {
-    console.log("Editing employee with ID:", id);
+    console.log("Editing employee with ID:", id);  // ✅ Check if ID is correct
 
-    // Check if user is authenticated
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (!user) {
-        alert("You must be logged in to edit an employee.");
-        return;
-    }
-
-    // Fetch employee data from Supabase
-    let { data, error: fetchError } = await supabase
-        .from('employee')  // 🔹 Make sure this is your correct table name
+    let { data, error } = await supabase
+        .from('employee')
         .select('*')
         .eq('employeeid', id)
-        .single();  // Fetch only one record
+        .single();
 
-    if (fetchError) {
-        console.error("Error fetching employee data:", fetchError);
-        alert("Error fetching employee data.");
+    if (error) {
+        console.error("Error fetching employee data:", error.message);
         return;
     }
 
-    console.log("Employee data retrieved:", data);
+    console.log("Employee data retrieved:", data);  // ✅ Check if data exists
 
-    // Populate the edit form fields
-    document.getElementById('edit_id').value = data.employeeid;  // Ensure 'employeeid' is correct
+    if (!data) {
+        console.error("No data found for employee ID:", id);
+        return;
+    }
+
+    // 🟢 Fill input fields
+    document.getElementById('edit_id').value = data.employeeid;  
     document.getElementById('edit_firstname').value = data.emp_firstname.trim();
     document.getElementById('edit_lastname').value = data.emp_lastname.trim();
-    document.getElementById('edit_department').value = data.emp_department;
-    document.getElementById('edit_role').value = data.emp_role;
-    document.getElementById('edit_branch').value = data.emp_branch;
+    document.getElementById('edit_department').value = data.emp_department.trim();
+    document.getElementById('edit_role').value = data.emp_role.trim();
+    document.getElementById('edit_branch').value = data.emp_branch.trim();
 
-    // Convert timestamp to HH:MM format
-    document.getElementById('edit_start_time').value = data.emp_starttime.split(" ")[1].substring(0, 5);
-    document.getElementById('edit_end_time').value = data.emp_endtime.split(" ")[1].substring(0, 5);
+    // 🟢 Fix emp_starttime issue
+    if (data.emp_starttime) {
+        document.getElementById('edit_start_time').value = data.emp_starttime.split(" ")[1].substring(0, 5);
+    } else {
+        console.warn("emp_starttime is missing for this employee.");
+    }
+
+    // 🟢 Fix emp_endtime issue
+    if (data.emp_endtime) {
+        document.getElementById('edit_end_time').value = data.emp_endtime.split(" ")[1].substring(0, 5);
+    } else {
+        console.warn("emp_endtime is missing for this employee.");
+    }
 
     // Show the modal
     document.getElementById('editEmployeeModal').style.display = 'block';
 }
+
 
 
 

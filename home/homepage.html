@@ -25,6 +25,9 @@
             window.location.href = "login.html";
         }
 
+
+
+        
         async function addEmployee(event) {
     event.preventDefault();
     
@@ -35,31 +38,32 @@
         return;
     }
 
-    const name = document.getElementById('name').value;
-    const department = document.getElementById('department').value;
-    const role = document.getElementById('role').value;
-    const branch = document.getElementById('branch').value;
-    const start_time = document.getElementById('start_time').value;
-    const end_time = document.getElementById('end_time').value;
+    const emp_name = document.getElementById('name').value;
+    const emp_department = document.getElementById('department').value;
+    const emp_role = document.getElementById('role').value;
+    const emp_branch = document.getElementById('branch').value;
+    const emp_starttime = document.getElementById('start_time').value;
+    const emp_endtime = document.getElementById('end_time').value;
     
     const { data, error: insertError } = await supabase
-        .from('employees')
-        .insert([{ name, department, role, branch, start_time, end_time }]);
+        .from('employee')  // ✅ Correct table name
+        .insert([{ emp_name, emp_department, emp_role, emp_branch, emp_starttime, emp_endtime }]);
 
     if (insertError) {
         alert('Error adding employee: ' + insertError.message);
+        console.error("Supabase error:", insertError);
     } else {
         alert('Employee added successfully!');
         document.getElementById('addEmployeeForm').reset();
         document.getElementById('addEmployeeModal').style.display = 'none';
-        loadEmployees();
+        loadEmployees(); // Refresh employee list
     }
 }
 
 async function editEmployee(id) {
     console.log("Editing employee with ID:", id);
 
-    const { data, error } = await supabase.from('employee') // 🔹 Changed to 'employee'
+    const { data, error } = await supabase.from('employee') // 
         .select('*')
         .eq('employee_id', id)
         .single();

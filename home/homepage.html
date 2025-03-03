@@ -79,7 +79,7 @@ async function editEmployee(id) {
 
     const { data, error } = await supabase.from('employee') // 
         .select('*')
-        .eq('employee_id', id)
+        .eq('employeeid', id)
         .single();
 
     if (error) {
@@ -144,7 +144,7 @@ async function deleteEmployee(id) {
     const { error } = await supabase
         .from('employee')  // 🔹 Updated table name
         .delete()
-        .eq('employee_id', id);  // 🔹 Ensure you're using the correct column for ID
+        .eq('employeeid', id);  // 🔹 Ensure you're using the correct column for ID
 
     if (error) {
         alert("Error deleting employee: " + error.message);
@@ -173,7 +173,7 @@ async function loadEmployees() {
     data.forEach(emp => {
         let newRow = tableBody.insertRow();
         newRow.innerHTML = `
-            <td>${emp.employee_id || emp.id}</td>  
+            <td>${emp.employeeid || emp.id}</td>  
             <td>${emp.emp_firstname}</td>
             <td>${emp.emp_lastname}</td>
             <td>${emp.emp_department}</td>

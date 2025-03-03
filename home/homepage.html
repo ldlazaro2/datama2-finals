@@ -173,17 +173,19 @@ async function updateEmployee(event) {
 async function deleteEmployee(id) {
     if (!confirm("Are you sure you want to delete this employee?")) return;
 
+    console.log("Deleting employee with ID:", id);
+
     const { error } = await supabase
-        .from('employee')
+        .from("employee")
         .delete()
-        .eq('employeeid', id); // 🔹 Ensure you're using the correct column for ID
+        .eq("employeeid", id);
 
     if (error) {
+        console.error("Error deleting employee:", error.message);
         alert("Error deleting employee: " + error.message);
-        console.error("Supabase error:", error);
     } else {
         alert("Employee deleted successfully!");
-        loadEmployees(); // Refresh the table after deletion
+        loadEmployees(); // 🔹 Refresh the list after deletion
     }
 }
 

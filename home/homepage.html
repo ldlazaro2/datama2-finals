@@ -75,36 +75,46 @@
 
 
 async function editEmployee(id) {
-    console.log(`Editing employee with ID: ${id}`);
+    console.log("Editing employee with ID:", id);
 
-    try {
-        const response = await fetch(`https://datama2-finals-indol.vercel.app/api/employees/${id}`);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch employee. Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Employee data retrieved:", data);
-
-        // Ensure start time and end time exist before processing
-        let startTime = data.emp_starttime ? data.emp_starttime.split(" ")[1].substring(0, 5) : "";
-        let endTime = data.emp_endtime ? data.emp_endtime.split(" ")[1].substring(0, 5) : "";
-
-        document.getElementById('edit_id').value = id;
-        document.getElementById('edit_firstname').value = data.emp_firstname.trim();
-        document.getElementById('edit_lastname').value = data.emp_lastname.trim();
-        document.getElementById('edit_department').value = data.emp_department.trim();
-        document.getElementById('edit_role').value = data.emp_role.trim();
-        document.getElementById('edit_branch').value = data.emp_branch.trim();
-        document.getElementById('edit_start_time').value = startTime;
-        document.getElementById('edit_end_time').value = endTime;
-
-        document.getElementById('editEmployeeModal').style.display = 'block';
-    } catch (error) {
-        console.error("Error fetching employee data:", error);
-        alert("Failed to fetch employee data.");
+    // Check if user is authenticated
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (!user) {
+        alert("You must be logged in to edit an employee.");
+        return;
     }
+
+    // Fetch employee data from Supabase
+    let { data, error: fetchError } = await supabase
+        .from('employee')  // 🔹 Make sure this is your correct table name
+        .select('*')
+        .eq('employeeid', id)
+        .single();  // Fetch only one record
+
+    if (fetchError) {
+        console.error("Error fetching employee data:", fetchError);
+        alert("Error fetching employee data.");
+        return;
+    }
+
+    console.log("Employee data retrieved:", data);
+
+    // Populate the edit form fields
+    document.getElementById('edit_id').value = data.employeeid;  // Ensure 'employeeid' is correct
+    document.getElementById('edit_firstname').value = data.emp_firstname.trim();
+    document.getElementById('edit_lastname').value = data.emp_lastname.trim();
+    document.getElementById('edit_department').value = data.emp_department;
+    document.getElementById('edit_role').value = data.emp_role;
+    document.getElementById('edit_branch').value = data.emp_branch;
+
+    // Convert timestamp to HH:MM format
+    document.getElementById('edit_start_time').value = data.emp_starttime.split(" ")[1].substring(0, 5);
+    document.getElementById('edit_end_time').value = data.emp_endtime.split(" ")[1].substring(0, 5);
+
+    // Show the modal
+    document.getElementById('editEmployeeModal').style.display = 'block';
 }
+
 
 
 

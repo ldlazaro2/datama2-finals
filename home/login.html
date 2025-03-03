@@ -25,11 +25,6 @@
     </div>
 </div>
 
-<!-- Header -->
-<header class="w3-display-container w3-content w3-wide" style="max-width:1500px;" id="home">
-    <img class="w3-image" src="https://i.pinimg.com/736x/1c/77/a6/1c77a66033942e5f45f3172ff1cfd4eb.jpg" alt="Shell" width="200">    
-</header>
-
 <!-- Page Content -->
 <div class="w3-content w3-padding content" style="max-width:1200px">
     
@@ -42,7 +37,17 @@
                 <input class="w3-input w3-border w3-margin-top" type="password" id="password" placeholder="Password" required>
                 <button class="w3-button shell-red w3-margin-top" type="submit">Login</button>
             </form>
-            <p id="error-message" style="color: red; display: none;"></p>
+            <p>Don't have an account? <a href="#" onclick="showSignup()">Sign up</a></p>
+
+            <!-- Signup Form (Hidden by Default) -->
+            <div id="signupForm" style="display:none;">
+                <h3>Sign Up</h3>
+                <form onsubmit="signup(event)">
+                    <input class="w3-input w3-border" type="email" id="signupEmail" placeholder="Email" required>
+                    <input class="w3-input w3-border w3-margin-top" type="password" id="signupPassword" placeholder="Password" required>
+                    <button class="w3-button shell-red w3-margin-top" type="submit">Sign Up</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -54,28 +59,46 @@
 
 <script>
     // Initialize Supabase
-    const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const { createClient } = supabase;
+    const supabaseUrl = 'https://nyfcjxeebjzejsutbgub.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE';
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Login Function
     async function login(event) {
         event.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        const errorMessage = document.getElementById("error-message");
-
-        // Attempt to sign in
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
         if (error) {
-            errorMessage.textContent = "Login failed: " + error.message;
-            errorMessage.style.display = "block";
-            return;
+            alert('Login failed: ' + error.message);
+        } else {
+            alert('Login successful!');
+            window.location.href = "homepage.html"; // Redirect after login
         }
+    }
 
-        // Redirect to dashboard if login is successful
-        window.location.href = "homepage.html";
+    // Signup Function
+    async function signup(event) {
+        event.preventDefault();
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+
+        const { data, error } = await supabase.auth.signUp({ email, password });
+
+        if (error) {
+            alert('Signup failed: ' + error.message);
+        } else {
+            alert('Signup successful! Please log in.');
+            document.getElementById('signupForm').style.display = 'none'; // Hide signup form
+        }
+    }
+
+    // Show Signup Form
+    function showSignup() {
+        document.getElementById('signupForm').style.display = 'block';
     }
 </script>
 

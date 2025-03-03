@@ -78,26 +78,32 @@ async function editEmployee(employeeId) {
     console.log("Editing employee with ID:", employeeId);
 
     try {
-        let response = await fetch(`/api/employees/${employeeId}`);
-        let data = await response.json(); // ✅ Now `data` is properly initialized
-        console.log("Employee data retrieved:", data);
+        let response = await fetch(`https://datama2-finals-indol.vercel.app/api/employees/${employeeId}`);
+        
+        let text = await response.text(); // Read response as text first
+        console.log("Raw Response:", text); // Check if it's HTML or JSON
 
-        // Make sure `emp_starttime` and `emp_endtime` exist before using them
-        let startTime = data.emp_starttime ? data.emp_starttime.split(" ")[1].substring(0, 5) : "";
-        let endTime = data.emp_endtime ? data.emp_endtime.split(" ")[1].substring(0, 5) : "";
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${text}`);
+        }
+
+        let data = JSON.parse(text); // Parse manually to avoid JSON errors
+        console.log("Employee data retrieved:", data);
 
         document.getElementById('edit_id').value = data.employeeid || data.id;
         document.getElementById('edit_firstname').value = data.emp_firstname.trim();
         document.getElementById('edit_department').value = data.emp_department;
         document.getElementById('edit_role').value = data.emp_role;
         document.getElementById('edit_branch').value = data.emp_branch;
-        document.getElementById('edit_start_time').value = startTime;
-        document.getElementById('edit_end_time').value = endTime; // ✅ Added back `end_time`
-        
+
+        document.getElementById('edit_start_time').value = data.emp_starttime ? data.emp_starttime.split(" ")[1].substring(0, 5) : "";
+        document.getElementById('edit_end_time').value = data.emp_endtime ? data.emp_endtime.split(" ")[1].substring(0, 5) : "";
+
         document.getElementById('editEmployeeModal').style.display = 'block';
 
     } catch (error) {
         console.error("Error fetching employee data:", error);
+        alert("Failed to load employee data. Check console for details.");
     }
 }
 

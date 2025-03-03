@@ -27,7 +27,7 @@
 
 
 
-        
+
         async function addEmployee(event) {
     event.preventDefault();
     
@@ -222,28 +222,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 </div>
 
 <!-- Add Employee Modal -->
-<div id="editEmployeeModal" class="w3-modal">
+<div id="addEmployeeModal" class="w3-modal">
     <div class="w3-modal-content w3-animate-top w3-card-4" style="max-width:500px">
-        <header class="w3-container w3-red">
-            <span onclick="document.getElementById('editEmployeeModal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
-            <h2>Edit Employee</h2>
+        <header class="w3-container w3-green">
+            <span onclick="document.getElementById('addEmployeeModal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+            <h2>Add Employee</h2>
         </header>
         <div class="w3-container">
-            <form id="editEmployeeForm" onsubmit="updateEmployee(event)">
-                <input type="hidden" id="edit_id">
+            <form id="addEmployeeForm" onsubmit="addEmployee(event)">
                 <label>Name</label>
-                <input class="w3-input w3-border" type="text" id="edit_name" required>
+                <input class="w3-input w3-border" type="text" id="name" required>
                 <label>Department</label>
-                <input class="w3-input w3-border" type="text" id="edit_department" required>
+                <input class="w3-input w3-border" type="text" id="department" required>
                 <label>Role</label>
-                <input class="w3-input w3-border" type="text" id="edit_role" required>
+                <input class="w3-input w3-border" type="text" id="role" required>
                 <label>Branch</label>
-                <input class="w3-input w3-border" type="text" id="edit_branch" required>
+                <input class="w3-input w3-border" type="text" id="branch" required>
                 <label>Start Time</label>
-                <input class="w3-input w3-border" type="time" id="edit_start_time" required>
+                <input class="w3-input w3-border" type="time" id="start_time" required>
                 <label>End Time</label>
-                <input class="w3-input w3-border" type="time" id="edit_end_time" required>
-                <button type="submit" class="w3-button w3-green w3-margin-top">Update</button>
+                <input class="w3-input w3-border" type="time" id="end_time" required>
+                <button type="submit" class="w3-button w3-green w3-margin-top">Add</button>
             </form>
         </div>
     </div>

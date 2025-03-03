@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
         .w3-bar { background-color: #d50000 !important; color: white; }
@@ -36,11 +37,12 @@
     <div class="w3-container w3-padding-32 w3-center">
         <div class="login-container w3-padding">
             <h3>Employee Login</h3>
-            <form onsubmit="redirectToDashboard(event)">
-                <input class="w3-input w3-border" type="text" id="employeeID" placeholder="Employee ID" required>
+            <form onsubmit="login(event)">
+                <input class="w3-input w3-border" type="email" id="email" placeholder="Email" required>
                 <input class="w3-input w3-border w3-margin-top" type="password" id="password" placeholder="Password" required>
                 <button class="w3-button shell-red w3-margin-top" type="submit">Login</button>
             </form>
+            <p id="error-message" style="color: red; display: none;"></p>
         </div>
     </div>
 </div>
@@ -51,10 +53,28 @@
 </footer>
 
 <script>
-    function redirectToDashboard(event) {
-        event.preventDefault(); // Prevents the default form submission
+    // Initialize Supabase
+    const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Redirect to employee home page (dashboard)
+    async function login(event) {
+        event.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const errorMessage = document.getElementById("error-message");
+
+        // Attempt to sign in
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (error) {
+            errorMessage.textContent = "Login failed: " + error.message;
+            errorMessage.style.display = "block";
+            return;
+        }
+
+        // Redirect to dashboard if login is successful
         window.location.href = "homepage.html";
     }
 </script>

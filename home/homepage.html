@@ -15,71 +15,67 @@
         footer { margin-top: auto; }
     </style>
     <script>
-        const { createClient } = supabase;
-            const supabaseUrl = 'https://nyfcjxeebjzejsutbgub.supabase.co'
-            const supabaseKey =  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE'
-            const supabase = createClient(supabaseUrl, supabaseKey)
-        
+        const supabase = window.supabase.createClient(
+            'https://nyfcjxeebjzejsutbgub.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE'
+        );
+
         function logout() {
             window.location.href = "login.html";
         }
 
         async function addEmployee(event) {
-    event.preventDefault();
-    const name = document.getElementById('name').value;
-    const department = document.getElementById('department').value;
-    const role = document.getElementById('role').value;
-    const branch = document.getElementById('branch').value;
-    const start_time = document.getElementById('start_time').value;
-    const end_time = document.getElementById('end_time').value;
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const department = document.getElementById('department').value;
+            const role = document.getElementById('role').value;
+            const branch = document.getElementById('branch').value;
+            const start_time = document.getElementById('start_time').value;
+            const end_time = document.getElementById('end_time').value;
+            
+            const { data, error } = await supabase.from('employees').insert([
+                { name, department, role, branch, start_time, end_time }
+            ]);
+            
+            if (error) {
+                alert('Error adding employee: ' + error.message);
+            } else {
+                alert('Employee added successfully!');
+                document.getElementById('addEmployeeForm').reset();
+                document.getElementById('addEmployeeModal').style.display = 'none';
+                loadEmployees(); // Reload employee list after adding
+            }
+        }
 
-    const { data, error } = await supabase.from('employees').insert([
-        { name, department, role, branch, start_time, end_time }
-    ]);
+        async function loadEmployees() {
+            const { data, error } = await supabase.from('employees').select('*');
+            if (error) {
+                console.error('Error fetching employees:', error);
+                return;
+            }
 
-    console.log("Supabase Response:", data, error); // Debugging line
+            const tableBody = document.getElementById('employeeTableBody');
+            tableBody.innerHTML = ''; // Clear table before adding updated rows
 
-    if (error) {
-        alert('Error adding employee: ' + error.message);
-    } else {
-        alert('Employee added successfully!');
-        document.getElementById('addEmployeeForm').reset();
-        document.getElementById('addEmployeeModal').style.display = 'none';
-        fetchEmployees(); // Refresh the list after adding
-    }
-}
+            data.forEach(emp => {
+                const row = `<tr>
+                    <td>${emp.id}</td>
+                    <td>${emp.name}</td>
+                    <td>${emp.department}</td>
+                    <td>${emp.role}</td>
+                    <td>${emp.branch}</td>
+                    <td>${emp.start_time}</td>
+                    <td>${emp.end_time}</td>
+                    <td>
+                        <button class="w3-button w3-small w3-blue">Edit</button>
+                        <button class="w3-button w3-small w3-red">Delete</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
 
-async function fetchEmployees() {
-    const { data, error } = await supabase.from('employees').select('*');
-
-    if (error) {
-        console.error('Error fetching employees:', error);
-        return;
-    }
-
-    const tableBody = document.querySelector("table tbody");
-    tableBody.innerHTML = ""; // Clear existing rows
-
-    data.forEach(employee => {
-        const row = `<tr>
-            <td>${employee.id}</td>
-            <td>${employee.name}</td>
-            <td>${employee.department}</td>
-            <td>${employee.role}</td>
-            <td>${employee.branch}</td>
-            <td>${employee.start_time}</td>
-            <td>${employee.end_time}</td>
-            <td>
-                <button class="w3-button w3-small w3-blue">Edit</button>
-                <button class="w3-button w3-small w3-red">Delete</button>
-            </td>
-        </tr>`;
-        tableBody.innerHTML += row;
-    });
-}
-
-// Load employees when page loads
-document.addEventListener("DOMContentLoaded", fetchEmployees);
+        document.addEventListener('DOMContentLoaded', loadEmployees);
     </script>
 </head>
 <body>
@@ -112,136 +108,9 @@ document.addEventListener("DOMContentLoaded", fetchEmployees);
                 <th>End Time</th>
                 <th>Actions</th>
             </tr>
-            <tr>
-                <td>001</td>
-                <td>Juan Dela Cruz</td>
-                <td>Sales</td>
-                <td>Manager</td>
-                <td>Main Branch</td>
-                <td>08:00</td>
-                <td>17:00</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>002</td>
-                <td>Maria Santos</td>
-                <td>HR</td>
-                <td>HR Manager</td>
-                <td>Main Branch</td>
-                <td>09:00</td>
-                <td>18:00</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>003</td>
-                <td>Carlos Reyes</td>
-                <td>Finance</td>
-                <td>Accountant</td>
-                <td>Branch A</td>
-                <td>08:30</td>
-                <td>17:30</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>004</td>
-                <td>Ana Mendoza</td>
-                <td>Marketing</td>
-                <td>Marketing Head</td>
-                <td>Branch B</td>
-                <td>10:00</td>
-                <td>19:00</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>005</td>
-                <td>Pedro Gomez</td>
-                <td>Operations</td>
-                <td>Supervisor</td>
-                <td>Branch C</td>
-                <td>07:00</td>
-                <td>16:00</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>006</td>
-                <td>Luis Hernandez</td>
-                <td>IT</td>
-                <td>System Admin</td>
-                <td>Main Branch</td>
-                <td>08:00</td>
-                <td>17:00</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>007</td>
-                <td>Rosa Villanueva</td>
-                <td>Customer Service</td>
-                <td>Representative</td>
-                <td>Branch D</td>
-                <td>09:00</td>
-                <td>18:00</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>008</td>
-                <td>Elena Cruz</td>
-                <td>Logistics</td>
-                <td>Coordinator</td>
-                <td>Branch E</td>
-                <td>08:00</td>
-                <td>17:00</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>009</td>
-                <td>Ricardo Dizon</td>
-                <td>Maintenance</td>
-                <td>Technician</td>
-                <td>Branch F</td>
-                <td>07:00</td>
-                <td>16:00</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>010</td>
-                <td>Francis Lim</td>
-                <td>Security</td>
-                <td>Security Officer</td>
-                <td>Main Branch</td>
-                <td>22:00</td>
-                <td>06:00</td>
-                <td>
-                    <button class="w3-button w3-small w3-blue">Edit</button>
-                    <button class="w3-button w3-small w3-red">Delete</button>
-                </td>
-            </tr>
+            <tbody id="employeeTableBody">
+                <!-- Employee list will be loaded dynamically -->
+            </tbody>
         </table>
         <button onclick="document.getElementById('addEmployeeModal').style.display='block'" class="w3-button w3-green w3-margin-top">Add Employee</button>
     </div>

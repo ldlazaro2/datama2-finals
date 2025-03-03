@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Shell Employee Portal</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shell Employee Portal</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <style>
         body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
         .w3-bar { background-color: #d50000 !important; color: white; }
@@ -25,29 +25,17 @@
     </div>
 </div>
 
-<!-- Page Content -->
+<!-- Login Section -->
 <div class="w3-content w3-padding content" style="max-width:1200px">
-    
-    <!-- Login Section -->
     <div class="w3-container w3-padding-32 w3-center">
         <div class="login-container w3-padding">
             <h3>Employee Login</h3>
-            <form onsubmit="login(event)">
-                <input class="w3-input w3-border" type="email" id="email" placeholder="Email" required>
-                <input class="w3-input w3-border w3-margin-top" type="password" id="password" placeholder="Password" required>
+            <form id="login-form">
+                <input class="w3-input w3-border" type="email" id="login-email" placeholder="Email" required>
+                <input class="w3-input w3-border w3-margin-top" type="password" id="login-password" placeholder="Password" required>
                 <button class="w3-button shell-red w3-margin-top" type="submit">Login</button>
             </form>
-            <p>Don't have an account? <a href="#" onclick="showSignup()">Sign up</a></p>
-
-            <!-- Signup Form (Hidden by Default) -->
-            <div id="signupForm" style="display:none;">
-                <h3>Sign Up</h3>
-                <form onsubmit="signup(event)">
-                    <input class="w3-input w3-border" type="email" id="signupEmail" placeholder="Email" required>
-                    <input class="w3-input w3-border w3-margin-top" type="password" id="signupPassword" placeholder="Password" required>
-                    <button class="w3-button shell-red w3-margin-top" type="submit">Sign Up</button>
-                </form>
-            </div>
+            <button class="w3-button w3-blue w3-margin-top" id="logout-btn" style="display: none;">Logout</button>
         </div>
     </div>
 </div>
@@ -58,48 +46,59 @@
 </footer>
 
 <script>
-    // Initialize Supabase
-    const { createClient } = supabase;
-    const supabaseUrl = 'https://nyfcjxeebjzejsutbgub.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Supabase Configuration (Replace with your actual Supabase credentials)
+    const supabaseUrl = "https://your-supabase-url.supabase.co";  // Replace with your Supabase URL
+    const supabaseKey = "your-anon-key"; // Replace with your Supabase Key
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function testLogin() {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: "test@example.com",
+            password: "password123"
+        });
+
+        if (error) {
+            console.error("Login error:", error.message);
+        } else {
+            console.log("Login successful!", data);
+        }
+    }
 
     // Login Function
-    async function login(event) {
+    document.getElementById("login-form").addEventListener("submit", async function (event) {
         event.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        const email = document.getElementById("login-email").value;
+        const password = document.getElementById("login-password").value;
 
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
         if (error) {
-            alert('Login failed: ' + error.message);
+            alert("Login failed: " + error.message);
         } else {
-            alert('Login successful!');
-            window.location.href = "homepage.html"; // Redirect after login
+            alert("Login successful!");
+            window.location.href = "homepage.html"; // Redirect to dashboard
         }
-    }
+    });
 
-    // Signup Function
-    async function signup(event) {
-        event.preventDefault();
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-
-        const { data, error } = await supabase.auth.signUp({ email, password });
-
+    // Logout Function
+    document.getElementById("logout-btn").addEventListener("click", async function () {
+        const { error } = await supabase.auth.signOut();
         if (error) {
-            alert('Signup failed: ' + error.message);
+            alert("Logout failed: " + error.message);
         } else {
-            alert('Signup successful! Please log in.');
-            document.getElementById('signupForm').style.display = 'none'; // Hide signup form
+            alert("Logged out successfully!");
+            window.location.href = "index.html"; // Redirect to login page
         }
-    }
+    });
 
-    // Show Signup Form
-    function showSignup() {
-        document.getElementById('signupForm').style.display = 'block';
-    }
+    // Check if User is Logged In
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            document.getElementById("logout-btn").style.display = "block";
+        } else {
+            document.getElementById("logout-btn").style.display = "none";
+        }
+    });
 </script>
 
 </body>

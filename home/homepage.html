@@ -159,6 +159,9 @@ async function deleteEmployee(id) {
 /////////////////////////////////
 async function loadEmployees() {
     const { data, error } = await supabase.from('employee').select('*');
+    .from('employee')
+        .select('*')
+        .order('employeeid', { ascending: true });
 
     if (error) {
         console.error("Error fetching employees:", error);

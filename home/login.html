@@ -51,49 +51,29 @@
     const supabaseKey = "your-anon-key"; // Replace with your Supabase Key
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Redirect logged-in users away from login page
-    async function checkUserSession() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-            window.location.href = "homepage.html"; // Redirect logged-in users
-        }
-    }
-    checkUserSession();
+    document.addEventListener("DOMContentLoaded", function () {
+        // Ensure the event listener is added after the page loads
+        document.getElementById("login-form").addEventListener("submit", async function (event) {
+            event.preventDefault(); // Prevent form from refreshing the page
+            
+            const email = document.getElementById("login-email").value;
+            const password = document.getElementById("login-password").value;
 
-    // Login Function
-    document.getElementById("login-form").addEventListener("submit", async function (event) {
-        event.preventDefault();
-        const email = document.getElementById("login-email").value;
-        const password = document.getElementById("login-password").value;
+            console.log("Attempting login..."); // Debugging step
 
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-        if (error) {
-            alert("Login failed: " + error.message);
-        } else {
-            alert("Login successful!");
-            window.location.href = "homepage.html"; // Redirect to homepage
-        }
-    });
+            if (error) {
+                console.error("Login failed:", error.message);
+                alert("Login failed: " + error.message);
+            } else {
+                console.log("Login successful!", data);
+                alert("Login successful!");
 
-    // Logout Function
-    document.getElementById("logout-btn").addEventListener("click", async function () {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            alert("Logout failed: " + error.message);
-        } else {
-            alert("Logged out successfully!");
-            window.location.href = "index.html"; // Redirect to login page
-        }
-    });
-
-    // Check if User is Logged In
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (session) {
-            document.getElementById("logout-btn").style.display = "block";
-        } else {
-            document.getElementById("logout-btn").style.display = "none";
-        }
+                // Redirect to homepage only if login is successful
+                window.location.href = "homepage.html";
+            }
+        });
     });
 </script>
 

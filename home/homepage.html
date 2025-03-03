@@ -126,26 +126,53 @@ async function editEmployee(id) {
 
 
 
-async function updateEmployee(event) {
+async function addEmployee(event) {
     event.preventDefault();
 
-    // Get Employee ID
-    const id = document.getElementById("edit_id").value;
+    // Get the smallest missing ID
+    let { data: existingIds, error: fetchError } = await supabase
+        .from('employee')
+        .select('employeeid')
+        .order('employeeid', { ascending: true });
 
-    // Get Updated Values
-    const today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD
-    const start_time = document.getElementById("edit_start_time").value;
-    const end_time = document.getElementById("edit_end_time").value;
+    if (fetchError) {
+        console.error('Error fetching existing IDs:', fetchError.message);
+        return;
+    }
 
-    const updatedEmployee = {
-        emp_firstname: document.getElementById("edit_firstname").value.trim(),
-        emp_lastname: document.getElementById("edit_lastname").value.trim(),
-        emp_department: document.getElementById("edit_department").value.trim(),
-        emp_role: document.getElementById("edit_role").value.trim(),
-        emp_branch: document.getElementById("edit_branch").value.trim(),
-        emp_starttime: `${today} ${start_time}:00`, // Convert to full timestamp
-        emp_endtime: `${today} ${end_time}:00`, // Convert to full timestamp
-    };
+    let newId = 1; // Default if table is empty
+    for (let i = 0; i < existingIds.length; i++) {
+        if (existingIds[i].employeeid !== i + 1) {
+            newId = i + 1;
+            break;
+        }
+        newId = existingIds.length + 1;
+    }
+
+    // Now insert with this new ID
+    const { data, error: insertError } = await supabase
+        .from('employee')
+        .insert([{ 
+            employeeid: newId, // Assign missing ID
+            emp_firstname: document.getElementById('firstname').value,
+            emp_lastname: document.getElementById('lastname').value,
+            emp_department: document.getElementById('department').value,
+            emp_role: document.getElementById('role').value,
+            emp_branch: document.getElementById('branch').value,
+            emp_starttime: document.getElementById('start_time').value + ":00",
+            emp_endtime: document.getElementById('end_time').value + ":00"
+        }]);
+
+    if (insertError) {
+        console.error('Error adding employee:', insertError.message);
+        alert('Failed to add employee.');
+    } else {
+        alert('Employee added successfully!');
+        document.getElementById('addEmployeeForm').reset();
+        loadEmployees(); // Refresh the employee list
+    }
+}
+
 
     console.log("Updating employee:", id, updatedEmployee);
 

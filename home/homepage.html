@@ -128,37 +128,42 @@ async function editEmployee(id) {
 
 async function updateEmployee(event) {
     event.preventDefault();
-    
-    const employeeId = document.getElementById('edit_id').value;
-    const updatedData = {
-        emp_firstname: document.getElementById('edit_firstname').value.trim(),
-        emp_lastname: document.getElementById('edit_lastname').value.trim(),
-        emp_department: document.getElementById('edit_department').value.trim(),
-        emp_role: document.getElementById('edit_role').value.trim(),
-        emp_branch: document.getElementById('edit_branch').value.trim(),
-        emp_starttime: document.getElementById('edit_start_time').value.trim(),
-        emp_endtime: document.getElementById('edit_end_time').value.trim()
+
+    // Get Employee ID
+    const id = document.getElementById("edit_id").value;
+
+    // Get Updated Values
+    const today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD
+    const start_time = document.getElementById("edit_start_time").value;
+    const end_time = document.getElementById("edit_end_time").value;
+
+    const updatedEmployee = {
+        emp_firstname: document.getElementById("edit_firstname").value.trim(),
+        emp_lastname: document.getElementById("edit_lastname").value.trim(),
+        emp_department: document.getElementById("edit_department").value.trim(),
+        emp_role: document.getElementById("edit_role").value.trim(),
+        emp_branch: document.getElementById("edit_branch").value.trim(),
+        emp_starttime: `${today} ${start_time}:00`, // Convert to full timestamp
+        emp_endtime: `${today} ${end_time}:00`, // Convert to full timestamp
     };
 
-    console.log("Updating employee:", employeeId, updatedData);
+    console.log("Updating employee:", id, updatedEmployee);
 
     const { error } = await supabase
-        .from('employee')
-        .update(updatedData)
-        .eq('employeeid', employeeId);
+        .from("employee")
+        .update(updatedEmployee)
+        .eq("employeeid", id);
 
     if (error) {
         console.error("Error updating employee:", error.message);
-        alert("Failed to update employee.");
-        return;
+        alert("Error updating employee: " + error.message);
+    } else {
+        alert("Employee updated successfully!");
+        document.getElementById("editEmployeeModal").style.display = "none";
+        loadEmployees(); // Refresh list
     }
-
-    console.log("Employee updated successfully!");
-
-    // Refresh the list & close the modal
-    loadEmployees();
-    document.getElementById('editEmployeeModal').style.display = 'none';
 }
+
 
 
 

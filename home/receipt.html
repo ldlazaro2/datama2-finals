@@ -64,64 +64,45 @@
     document.getElementById("branch").textContent = branch;
 
     async function fetchGasTypeName() {
-        const { data, error } = await supabase
-            .from("Products")
-            .select("product_name, price")
-            .eq("productID", gasTypeID)
-            .single();
+    const { data, error } = await supabase
+        .from("Products")
+        .select("product_name, price")
+        .eq("productID", gasTypeID)
+        .single();
 
-        if (error) {
-            console.error("Error fetching gas type:", error.message);
-            document.getElementById("gasTypeName").textContent = "Unknown";
-            return;
-        }
-
-        document.getElementById("gasTypeName").textContent = data.product_name;
-        document.getElementById("pricePerLiter").textContent = data.price;
+    if (error) {
+        console.error("Error fetching gas type:", error.message);
+        document.getElementById("gasTypeName").textContent = "Unknown";
+        return;
     }
 
-    async function fetchSupplierName() {
-        const { data, error } = await supabase
-            .from("Supplier")
-            .select("supplier_name")
-            .eq("supplierID", supplierID)
-            .single();
-
-        if (error) {
-            console.error("Error fetching supplier:", error.message);
-            document.getElementById("supplier").textContent = "Unknown";
-            return;
-        }
-
-        document.getElementById("supplier").textContent = data.supplier_name;
-    }
-
+    document.getElementById("gasTypeName").textContent = data.product_name;
+    document.getElementById("pricePerLiter").textContent = data.price;
+    
+    // ✅ Calculate correct total price
+    document.getElementById("totalAmount").textContent = (data.price * quantity).toFixed(2);
+}
     async function finalizeOrder() {
-        const { data, error } = await supabase
-            .from("Orders")
-            .insert([
-                { 
-                    productID: gasTypeID, 
-                    quantity: quantity, 
-                    total_price: totalAmount, 
-                    branch: branch, 
-                    supplierID: supplierID
-                }
-            ]);
+    const { data, error } = await supabase
+        .from("Orders")
+        .insert([
+            { 
+                productID: gasTypeID, 
+                quantity: quantity, 
+                total_price: (document.getElementById("pricePerLiter").textContent * quantity).toFixed(2),
+                supplierID: supplierID
+            }
+        ]);
 
-        if (error) {
-            console.error("Error saving order:", error.message);
-            alert("Order failed. Please try again.");
-        } else {
-            alert("Order successfully recorded!");
-            window.location.href = "employeepage.html";  // ✅ Redirects to employeepage.html
-        }
+    if (error) {
+        console.error("Error saving order:", error.message);
+        alert("Order failed. Please try again.");
+    } else {
+        alert("Order successfully recorded!");
+        window.location.href = "employeepage.html";  // ✅ Redirects to employee page
     }
+}
 
-    document.addEventListener("DOMContentLoaded", () => {
-        fetchGasTypeName();
-        fetchSupplierName();
-    });
 </script>
 
 </body>

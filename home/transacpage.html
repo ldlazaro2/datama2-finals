@@ -39,50 +39,57 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Initialize Supabase
-        const supabase = supabase.createClient(
-            "https://nyfcjxeebjzejsutbgub.supabase.co",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE"
-        );
+const supabase = supabase.createClient(
+    "https://nyfcjxeebjzejsutbgub.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE"
+);
 
-        async function loadLatestOrder() {
-            const { data, error } = await supabase
-                .from("Orders")
-                .select("productID, total_price, supplierID")
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .single();
+document.addEventListener("DOMContentLoaded", function() {
+    async function loadLatestOrder() {
+        const { data, error } = await supabase
+            .from("Orders")
+            .select("productID, total_price, supplierID")
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single();
 
-            if (error) {
-                console.error("Error loading order:", error.message);
-                return;
-            }
-
-            // Fetch gas type name
-            const { data: productData } = await supabase
-                .from("Product")
-                .select("productName")
-                .eq("productID", data.productID)
-                .single();
-            
-            document.getElementById("gasTypeName").textContent = productData ? productData.product_name : "Unknown";
-            document.getElementById("totalAmount").textContent = data.total_price;
-
-            // Fetch supplier name, contact, and address
-            const { data: supplierData } = await supabase
-                .from("Supplier")
-                .select("supplier_name, supplier_contact, supplier_address")
-                .eq("supplierID", data.supplierID)
-                .single();
-            
-            document.getElementById("supplierName").textContent = supplierData ? supplierData.supplier_name : "Unknown";
-            document.getElementById("supplierContact").textContent = supplierData ? supplierData.supplier_contact : "Unknown";
-            document.getElementById("supplierAddress").textContent = supplierData ? supplierData.supplier_address : "Unknown";
+        if (error) {
+            console.error("Error loading order:", error.message);
+            return;
         }
 
-        loadLatestOrder();
-    });
+        // Fetch gas type name
+        const { data: productData, error: productError } = await supabase
+            .from("Products")  // ✅ Fix table name (Previously "Product")
+            .select("product_name") 
+            .eq("productID", data.productID)
+            .single();
+        
+        if (productError) {
+            console.error("Error fetching product:", productError.message);
+        }
+
+        document.getElementById("gasTypeName").textContent = productData ? productData.product_name : "Unknown";
+        document.getElementById("totalAmount").textContent = data.total_price;
+
+        // Fetch supplier details
+        const { data: supplierData, error: supplierError } = await supabase
+            .from("Supplier")
+            .select("supplier_name, supplier_contact, supplier_address")
+            .eq("supplierID", data.supplierID)
+            .single();
+        
+        if (supplierError) {
+            console.error("Error fetching supplier:", supplierError.message);
+        }
+
+        document.getElementById("supplierName").textContent = supplierData ? supplierData.supplier_name : "Unknown";
+        document.getElementById("supplierContact").textContent = supplierData ? supplierData.supplier_contact : "Unknown";
+        document.getElementById("supplierAddress").textContent = supplierData ? supplierData.supplier_address : "Unknown";
+    }
+
+    loadLatestOrder();
+});
 </script>
 
 </body>

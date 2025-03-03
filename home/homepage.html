@@ -5,17 +5,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background-color: white; display: flex; flex-direction: column; min-height: 100vh; }
         .w3-bar { background-color: #d50000 !important; color: white; }
         .w3-button { color: white !important; }
-        .content { flex: 1; padding: 60px 20px 20px; } /* Prevent overlap with navbar */
+        .content { flex: 1; padding: 60px 20px 20px; }
         .card { background-color: #e0e0e0; padding: 20px; border-radius: 10px; margin-top: 20px; }
         footer { margin-top: auto; }
     </style>
     <script>
+        const supabase = supabase.createClient('https://your-supabase-url.supabase.co', 'your-anon-key');
+        
         function logout() {
-            window.location.href = "login.html"; // Redirect to login page
+            window.location.href = "login.html";
+        }
+
+        async function addEmployee(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const department = document.getElementById('department').value;
+            const role = document.getElementById('role').value;
+            const branch = document.getElementById('branch').value;
+            const start_time = document.getElementById('start_time').value;
+            const end_time = document.getElementById('end_time').value;
+            
+            const { data, error } = await supabase.from('employees').insert([
+                { name, department, role, branch, start_time, end_time }
+            ]);
+            
+            if (error) {
+                alert('Error adding employee: ' + error.message);
+            } else {
+                alert('Employee added successfully!');
+                document.getElementById('addEmployeeForm').reset();
+                document.getElementById('addEmployeeModal').style.display = 'none';
+            }
         }
     </script>
 </head>
@@ -180,7 +205,34 @@
                 </td>
             </tr>
         </table>
-        <button class="w3-button w3-green w3-margin-top">Add Employee</button>
+        <button onclick="document.getElementById('addEmployeeModal').style.display='block'" class="w3-button w3-green w3-margin-top">Add Employee</button>
+    </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div id="addEmployeeModal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top w3-card-4" style="max-width:500px">
+        <header class="w3-container w3-red">
+            <span onclick="document.getElementById('addEmployeeModal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+            <h2>Add Employee</h2>
+        </header>
+        <div class="w3-container">
+            <form id="addEmployeeForm" onsubmit="addEmployee(event)">
+                <label>Name</label>
+                <input class="w3-input w3-border" type="text" id="name" required>
+                <label>Department</label>
+                <input class="w3-input w3-border" type="text" id="department" required>
+                <label>Role</label>
+                <input class="w3-input w3-border" type="text" id="role" required>
+                <label>Branch</label>
+                <input class="w3-input w3-border" type="text" id="branch" required>
+                <label>Start Time</label>
+                <input class="w3-input w3-border" type="time" id="start_time" required>
+                <label>End Time</label>
+                <input class="w3-input w3-border" type="time" id="end_time" required>
+                <button type="submit" class="w3-button w3-green w3-margin-top">Submit</button>
+            </form>
+        </div>
     </div>
 </div>
 

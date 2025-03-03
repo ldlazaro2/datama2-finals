@@ -74,39 +74,37 @@
 }
 
 
-async function editEmployee(employeeId) {
-    console.log("Editing employee with ID:", employeeId);
+async function editEmployee(id) {
+    console.log(`Editing employee with ID: ${id}`);
 
     try {
-        let response = await fetch(`https://datama2-finals-indol.vercel.app/api/employees/${employeeId}`);
-        
-        let text = await response.text(); // Read response as text first
-        console.log("Raw Response:", text); // Check if it's HTML or JSON
-
+        const response = await fetch(`https://datama2-finals-indol.vercel.app/api/employees/${id}`);
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${text}`);
+            throw new Error(`Failed to fetch employee. Status: ${response.status}`);
         }
 
-        let data = JSON.parse(text); // Parse manually to avoid JSON errors
+        const data = await response.json();
         console.log("Employee data retrieved:", data);
 
-        document.getElementById('edit_id').value = data.employeeid || data.id;
-        document.getElementById('edit_firstname').value = data.emp_firstname.trim();
-        document.getElementById('edit_department').value = data.emp_department;
-        document.getElementById('edit_role').value = data.emp_role;
-        document.getElementById('edit_branch').value = data.emp_branch;
+        // Ensure start time and end time exist before processing
+        let startTime = data.emp_starttime ? data.emp_starttime.split(" ")[1].substring(0, 5) : "";
+        let endTime = data.emp_endtime ? data.emp_endtime.split(" ")[1].substring(0, 5) : "";
 
-        document.getElementById('edit_start_time').value = data.emp_starttime ? data.emp_starttime.split(" ")[1].substring(0, 5) : "";
-        document.getElementById('edit_end_time').value = data.emp_endtime ? data.emp_endtime.split(" ")[1].substring(0, 5) : "";
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_firstname').value = data.emp_firstname.trim();
+        document.getElementById('edit_lastname').value = data.emp_lastname.trim();
+        document.getElementById('edit_department').value = data.emp_department.trim();
+        document.getElementById('edit_role').value = data.emp_role.trim();
+        document.getElementById('edit_branch').value = data.emp_branch.trim();
+        document.getElementById('edit_start_time').value = startTime;
+        document.getElementById('edit_end_time').value = endTime;
 
         document.getElementById('editEmployeeModal').style.display = 'block';
-
     } catch (error) {
         console.error("Error fetching employee data:", error);
-        alert("Failed to load employee data. Check console for details.");
+        alert("Failed to fetch employee data.");
     }
 }
-
 
 
 

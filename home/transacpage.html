@@ -61,7 +61,7 @@
         }
 
         // Redirect to the receipt page with order details
-        window.location.href = `receipt.html?gasType=${gasType}&quantity=${quantity}&branch=${branch}`;
+        window.location.href = `receipt.html?gasType=${encodeURIComponent(gasType)}&quantity=${encodeURIComponent(quantity)}&branch=${encodeURIComponent(branch)}`;
     }
 </script>
 

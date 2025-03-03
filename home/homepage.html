@@ -112,7 +112,7 @@ async function deleteEmployee(id) {
 
 /////////////////////////////////
 async function loadEmployees() {
-    console.log("Loading employees..."); // ✅ Debugging log
+    console.log("Loading employees..."); // Debugging log
 
     const { data, error } = await supabase.from('employees').select('*');
     
@@ -121,24 +121,25 @@ async function loadEmployees() {
         return;
     }
 
-    console.log("Employee data received:", data); // ✅ Debugging log
+    console.log("Employee data received:", data); // Debugging log
 
     const tableBody = document.getElementById('employeeTableBody');
     tableBody.innerHTML = ''; // Clear table before adding updated rows
 
     data.forEach(emp => {
         let newRow = tableBody.insertRow();
-        newRow.innerHTML = `<td>${emp.id}</td>
-                            <td>${emp.name}</td>
-                            <td>${emp.department}</td>
-                            <td>${emp.role}</td>
-                            <td>${emp.branch}</td>
-                            <td>${emp.start_time}</td>
-                            <td>${emp.end_time}</td>
-                            <td>
-                                <button class="w3-button w3-small w3-blue">Edit</button>
-                                <button class="w3-button w3-small w3-red">Delete</button>
-                            </td>`;
+        newRow.innerHTML = `
+            <td>${emp.id}</td>
+            <td>${emp.name}</td>
+            <td>${emp.department}</td>
+            <td>${emp.role}</td>
+            <td>${emp.branch}</td>
+            <td>${emp.start_time}</td>
+            <td>${emp.end_time}</td>
+            <td>
+                <button class="w3-button w3-small w3-blue" onclick="editEmployee(${emp.id})">Edit</button>
+                <button class="w3-button w3-small w3-red" onclick="deleteEmployee(${emp.id})">Delete</button>
+            </td>`;
     });
 }
 

@@ -75,13 +75,12 @@
 
 
 async function editEmployee(id) {
-    console.log("Editing employee with ID:", id);
+    console.log("Editing employee with ID:", id); // Debugging log
 
-    // Fetch employee details from Supabase
     const { data, error } = await supabase
         .from('employee')
         .select('*')
-        .eq('employeeid', id) // 🔹 Ensure the column name is correct
+        .eq('employeeid', id) // ✅ Use 'employeeid' as per your DB column
         .single();
 
     if (error) {
@@ -90,10 +89,17 @@ async function editEmployee(id) {
         return;
     }
 
-    console.log("Employee data retrieved:", data);
+    console.log("Employee data retrieved:", data); // Debugging log
 
-    // Populate the edit modal with employee details
-    document.getElementById('edit_id').value = data.employee_id; // Make sure this ID exists in the form
+    // Ensure the modal exists before updating
+    const editModal = document.getElementById('editEmployeeModal');
+    if (!editModal) {
+        console.error("Edit modal not found!");
+        return;
+    }
+
+    // Populate modal fields
+    document.getElementById('edit_id').value = data.employeeid;
     document.getElementById('edit_firstname').value = data.emp_firstname;
     document.getElementById('edit_lastname').value = data.emp_lastname;
     document.getElementById('edit_department').value = data.emp_department;
@@ -102,8 +108,10 @@ async function editEmployee(id) {
     document.getElementById('edit_start_time').value = data.emp_starttime.split(" ")[1].substring(0, 5);
     document.getElementById('edit_end_time').value = data.emp_endtime.split(" ")[1].substring(0, 5);
 
-    document.getElementById('editEmployeeModal').style.display = 'block';
+    // Show the modal
+    editModal.style.display = 'block';
 }
+
 
 
 

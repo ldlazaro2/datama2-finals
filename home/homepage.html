@@ -57,11 +57,16 @@
 }
 
 async function editEmployee(id) {
+    console.log("Editing employee ID:", id); // ✅ Debugging log
+
     const { data, error } = await supabase.from('employees').select('*').eq('id', id).single();
+    
     if (error) {
-        alert("Error fetching employee details.");
+        alert("Error fetching employee details: " + error.message);
         return;
     }
+
+    console.log("Employee data:", data); // ✅ Debugging log
 
     document.getElementById('edit_id').value = data.id;
     document.getElementById('edit_name').value = data.name;
@@ -71,7 +76,7 @@ async function editEmployee(id) {
     document.getElementById('edit_start_time').value = data.start_time;
     document.getElementById('edit_end_time').value = data.end_time;
 
-    document.getElementById('editEmployeeModal').style.display = 'block';
+    document.getElementById('editEmployeeModal').style.display = 'block'; // ✅ Open modal
 }
 
 async function updateEmployee(event) {
@@ -85,16 +90,20 @@ async function updateEmployee(event) {
     const start_time = document.getElementById('edit_start_time').value;
     const end_time = document.getElementById('edit_end_time').value;
 
-    const { error } = await supabase.from('employees').update({ name, department, role, branch, start_time, end_time }).eq('id', id);
+    const { error } = await supabase
+        .from('employees')
+        .update({ name, department, role, branch, start_time, end_time })
+        .eq('id', id);
 
     if (error) {
-        alert("Error updating employee.");
+        alert("Error updating employee: " + error.message);
     } else {
         alert("Employee updated successfully!");
         document.getElementById('editEmployeeModal').style.display = 'none';
-        loadEmployees();
+        await loadEmployees(); // ✅ Refresh list
     }
 }
+
 
 ///////////////////////////////////
 async function deleteEmployee(id) {
@@ -103,10 +112,10 @@ async function deleteEmployee(id) {
     const { error } = await supabase.from('employees').delete().eq('id', id);
 
     if (error) {
-        alert("Error deleting employee.");
+        alert("Error deleting employee: " + error.message);
     } else {
         alert("Employee deleted successfully!");
-        loadEmployees();
+        await loadEmployees(); // ✅ Reload the employee list after deleting
     }
 }
 
@@ -142,6 +151,7 @@ async function loadEmployees() {
             </td>`;
     });
 }
+
 
 // Call function when page loads
 document.addEventListener("DOMContentLoaded", async () => {

@@ -77,9 +77,11 @@
 async function editEmployee(id) {
     console.log("Editing employee with ID:", id);
 
-    const { data, error } = await supabase.from('employee') // 
+    // Fetch employee details from Supabase
+    const { data, error } = await supabase
+        .from('employee')
         .select('*')
-        .eq('employeeid', id)
+        .eq('employeeid', id) // 🔹 Ensure the column name is correct
         .single();
 
     if (error) {
@@ -90,15 +92,15 @@ async function editEmployee(id) {
 
     console.log("Employee data retrieved:", data);
 
-    // Update input fields with new column names
-    document.getElementById('edit_id').value = data.employee_id;
+    // Populate the edit modal with employee details
+    document.getElementById('edit_id').value = data.employee_id; // Make sure this ID exists in the form
     document.getElementById('edit_firstname').value = data.emp_firstname;
     document.getElementById('edit_lastname').value = data.emp_lastname;
     document.getElementById('edit_department').value = data.emp_department;
     document.getElementById('edit_role').value = data.emp_role;
     document.getElementById('edit_branch').value = data.emp_branch;
-    document.getElementById('edit_start_time').value = data.emp_starttime;
-    document.getElementById('edit_end_time').value = data.emp_endtime;
+    document.getElementById('edit_start_time').value = data.emp_starttime.split(" ")[1].substring(0, 5);
+    document.getElementById('edit_end_time').value = data.emp_endtime.split(" ")[1].substring(0, 5);
 
     document.getElementById('editEmployeeModal').style.display = 'block';
 }
@@ -108,21 +110,22 @@ async function editEmployee(id) {
 async function updateEmployee(event) {
     event.preventDefault();
 
-    let id = document.getElementById('edit_id').value;
+    let id = document.getElementById('edit_id').value; // Make sure this exists in the edit form
+
     let updatedData = {
         emp_firstname: document.getElementById('edit_firstname').value,
         emp_lastname: document.getElementById('edit_lastname').value,
         emp_department: document.getElementById('edit_department').value,
         emp_role: document.getElementById('edit_role').value,
         emp_branch: document.getElementById('edit_branch').value,
-        emp_starttime: document.getElementById('edit_start_time').value,
-        emp_endtime: document.getElementById('edit_end_time').value
+        emp_starttime: document.getElementById('edit_start_time').value + ":00",
+        emp_endtime: document.getElementById('edit_end_time').value + ":00"
     };
 
     const { error } = await supabase
-        .from('employee') // 🔹 Changed to 'employee'
+        .from('employee')
         .update(updatedData)
-        .eq('employee_id', id);
+        .eq('employeeid', id); // 🔹 Use correct column name
 
     if (error) {
         alert("Error updating employee: " + error.message);
@@ -137,14 +140,15 @@ async function updateEmployee(event) {
 
 
 
+
 ///////////////////////////////////
 async function deleteEmployee(id) {
     if (!confirm("Are you sure you want to delete this employee?")) return;
 
     const { error } = await supabase
-        .from('employee')  // 🔹 Updated table name
+        .from('employee')
         .delete()
-        .eq('employeeid', id);  // 🔹 Ensure you're using the correct column for ID
+        .eq('employeeid', id); // 🔹 Ensure you're using the correct column for ID
 
     if (error) {
         alert("Error deleting employee: " + error.message);
@@ -271,6 +275,71 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
     </div>
 </div>
+
+
+
+<!--EDIT-->
+<div id="editEmployeeModal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top w3-card-4" style="max-width:500px">
+        <header class="w3-container w3-blue">
+            <span onclick="document.getElementById('editEmployeeModal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+            <h2>Edit Employee</h2>
+        </header>
+        <div class="w3-container">
+            <form id="editEmployeeForm" onsubmit="updateEmployee(event)">
+                <input type="hidden" id="edit_id">  <!-- Hidden ID field -->
+                
+                <label>First Name</label>
+                <input class="w3-input w3-border" type="text" id="edit_firstname" required>
+                
+                <label>Last Name</label>
+                <input class="w3-input w3-border" type="text" id="edit_lastname" required>
+                
+                <label>Department</label>
+                <input class="w3-input w3-border" type="text" id="edit_department" required>
+                
+                <label>Role</label>
+                <input class="w3-input w3-border" type="text" id="edit_role" required>
+                
+                <label>Branch</label>
+                <input class="w3-input w3-border" type="text" id="edit_branch" required>
+                
+                <label>Start Time</label>
+                <input class="w3-input w3-border" type="time" id="edit_start_time" required>
+                
+                <label>End Time</label>
+                <input class="w3-input w3-border" type="time" id="edit_end_time" required>
+                
+                <button type="submit" class="w3-button w3-blue w3-margin-top">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!--DELETE-->
+
+<div id="deleteEmployeeModal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top w3-card-4" style="max-width:400px">
+        <header class="w3-container w3-red">
+            <span onclick="document.getElementById('deleteEmployeeModal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+            <h2>Delete Employee</h2>
+        </header>
+        <div class="w3-container">
+            <p>Are you sure you want to delete this employee?</p>
+            <input type="hidden" id="delete_id">  <!-- Hidden ID field -->
+            <div class="w3-margin-top">
+                <button onclick="confirmDeleteEmployee()" class="w3-button w3-red">Yes, Delete</button>
+                <button onclick="document.getElementById('deleteEmployeeModal').style.display='none'" class="w3-button w3-gray">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
 <!-- Footer -->
 <footer class="w3-center w3-black w3-padding-16">

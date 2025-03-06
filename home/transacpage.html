@@ -29,141 +29,49 @@
 <div class="w3-content w3-padding content" style="max-width:600px">
     <h2 class="w3-margin-top">Transaction Summary</h2>
     <div class="card">
-        <label for="product"><strong>Gas Type:</strong></label>
-        <select id="product" class="w3-input w3-border" onchange="updateTotal()">
-            <option value="Premium Gas" data-price="65.75">Premium Gas - ₱65.75</option>
-            <option value="Unleaded" data-price="60.50">Unleaded - ₱60.50</option>
-            <option value="Diesel" data-price="55.25">Diesel - ₱55.25</option>
+        <label for="gasType"><strong>Gas Type:</strong></label>
+        <select id="gasType" class="w3-input w3-border">
+            <option value="1">Premium Gas - ₱65.75</option>
+            <option value="2">Unleaded - ₱60.50</option>
+            <option value="3">Diesel - ₱55.25</option>
         </select>
 
         <label for="quantity"><strong>Quantity (liters):</strong></label>
-        <input type="number" id="quantity" class="w3-input w3-border" min="1" value="1" oninput="updateTotal()">
+        <input type="number" id="quantity" class="w3-input w3-border" min="1" value="1">
 
         <label for="branch"><strong>Branch:</strong></label>
         <input type="text" id="branch" class="w3-input w3-border" value="Branch A">
 
         <p><strong>Total Cost:</strong> ₱<span id="totalAmount">0.00</span></p>
     </div>
-    <button class="receipt-btn" onclick="proceedToReceipt()">Confirm Order</button>
+    <button class="receipt-btn" onclick="proceedToReceipt()">Proceed to Receipt</button>
 </div>
 
 <script>
-    // 🛠 FIX: Define Supabase before using it
-    const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const gasPrices = {
+        1: 65.75, // Premium Gas
+        2: 60.50, // Regular Gas
+        3: 55.25  // Diesel
+    };
 
-    // 🛠 FIX: Define updateTotal() before using it
-    function updateTotal() {
-        let product = document.getElementById("product");
-        let quantity = parseInt(document.getElementById("quantity").value) || 1;
-        let price = parseFloat(product.options[product.selectedIndex].getAttribute("data-price"));
-        document.getElementById("totalAmount").textContent = (quantity * price).toFixed(2);
-    }
-    updateTotal();
 
-    async function proceedToReceipt() {
-        try {
-            // Fetch input values
-            const productName = document.getElementById("product").value;
-            const quantity = parseInt(document.getElementById("quantity").value);
-            const branch = document.getElementById("branch").value;
-            const totalAmount = parseFloat(document.getElementById("totalAmount").textContent);
-            
-            // Step 1: Fetch EmployeeID based on Branch
-            const { data: employeeData, error: employeeError } = await supabase
-                .from("Employee")
-                .select("EmployeeID")
-                .eq("emp_branch", branch)
-                .limit(1)
-                .single();
+    document.getElementById("quantity").addEventListener("input", function() {
+        const gasType = document.getElementById("gasType").value;
+        const quantity = parseFloat(document.getElementById("quantity").value);
+        const totalAmount = gasPrices[gasType] * quantity;
+        document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
+    });
 
-            if (employeeError || !employeeData) {
-                console.error("Employee Error:", employeeError);
-                alert("Employee not found for this branch!");
-                return;
-            }
-            const employeeID = employeeData.EmployeeID;
 
-            // Step 2: Fetch SupplierID (assuming first supplier)
-            const { data: supplierData, error: supplierError } = await supabase
-                .from("Supplier")
-                .select("SupplierID")
-                .limit(1)
-                .single();
+    function proceedToReceipt() {
+        const gasType = document.getElementById("gasType").value;
+        const quantity = document.getElementById("quantity").value;
+        const branch = document.getElementById("branch").value;
+        const totalAmount = document.getElementById("totalAmount").textContent;
 
-            if (supplierError || !supplierData) {
-                console.error("Supplier Error:", supplierError);
-                alert("Supplier not found!");
-                return;
-            }
-            const supplierID = supplierData.SupplierID;
-
-            // Step 3: Insert order into Orders table
-            const { data: orderData, error: orderError } = await supabase
-                .from("Orders")
-                .insert([
-                    {
-                        SupplierID: supplierID,
-                        EmployeeID: employeeID,
-                        OrderDate: new Date().toISOString(),
-                        TotalAmount: totalAmount,
-                    },
-                ])
-                .select()
-                .single();
-
-            if (orderError || !orderData) {
-                console.error("Order Insert Error:", orderError);
-                alert("Failed to create order!");
-                return;
-            }
-            const orderID = orderData.orderID;
-
-            // Step 4: Fetch ProductID
-            const { data: productData, error: productError } = await supabase
-                .from("Product")
-                .select("productID")
-                .eq("ProductName", productName)
-                .limit(1)
-                .single();
-
-            if (productError || !productData) {
-                console.error("Product Error:", productError);
-                alert("Product not found!");
-                return;
-            }
-            const productID = productData.productID;
-
-            // Step 5: Insert into Orders_Has_Product table
-            const { error: orderProductError } = await supabase
-                .from("Orders_Has_Product")
-                .insert([
-                    {
-                        orders_orderID: orderID,
-                        product_productID: productID,
-                        quantity: quantity,
-                    },
-                ]);
-
-            if (orderProductError) {
-                console.error("Orders_Has_Product Insert Error:", orderProductError);
-                alert("Failed to add product to order!");
-                return;
-            }
-
-            // Step 6: Redirect to receipt page
-            const receiptURL = `receipt.html?productName=${encodeURIComponent(productName)}&quantity=${quantity}&branch=${encodeURIComponent(branch)}&totalAmount=${totalAmount}`;
-            console.log("Redirecting to:", receiptURL);
-            window.location.href = receiptURL;
-
-        } catch (error) {
-            console.error("Unexpected Error:", error);
-            alert("Something went wrong, please try again.");
-        }
+        window.location.href = `receipt.html?gasType=${gasType}&quantity=${quantity}&branch=${branch}&totalAmount=${totalAmount}`;
     }
 </script>
 
 </body>
 </html>
-

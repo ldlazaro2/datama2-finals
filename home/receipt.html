@@ -50,108 +50,22 @@
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
-    document.getElementById("productname").textContent = urlParams.get("productname");
+    document.getElementById("gasType").textContent = urlParams.get("gasType");
     document.getElementById("quantity").textContent = urlParams.get("quantity");
     document.getElementById("branch").textContent = urlParams.get("branch");
     document.getElementById("totalAmount").textContent = urlParams.get("totalAmount");
 
-    const supabaseUrl = 'https://nyfcjxeebjzejsutbgub.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE'; // Replace this with the correct anon key
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabase = window.supabase.createClient(
+            'https://nyfcjxeebjzejsutbgub.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE'
+        );
 
-async function confirmOrder() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const productname = urlParams.get("productname");
-    const quantity = parseInt(urlParams.get("quantity"), 10);
-    const totalamount = parseFloat(urlParams.get("totalAmount"));
-    const supplier_name = document.getElementById("supplier").value;
 
-    if (!productname || isNaN(quantity) || isNaN(totalamount)) {
-        alert("Invalid order details. Please try again.");
-        return;
+    function confirmOrder() {
+        alert("Order confirmed!");
+        window.location.href = "employeepage.html";
     }
-
-    // Get supplierid
-    const { data: supplierData, error: supplierError } = await supabase
-        .from('supplier')
-        .select('supplierid')
-        .eq('supplier_name', supplier_name)
-        .single();
-
-    if (supplierError || !supplierData) {
-        alert("Error fetching supplier.");
-        console.error(supplierError);
-        return;
-    }
-
-    const supplierid = supplierData.supplierid;
-
-    // Get employeeid from localStorage
-    const employeeid = localStorage.getItem("employeeid");
-    if (!employeeid) {
-        alert("Employee not logged in.");
-        return;
-    }
-
-    // Insert into orders table
-    const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert([
-            {
-                supplierid: supplierid,
-                employeeid: employeeid,
-                orderdate: new Date().toISOString(),
-                totalamount: totalamount
-            }
-        ])
-        .select('orderid')
-        .single();
-
-    if (orderError || !orderData) {
-        alert("Error placing order.");
-        console.error(orderError);
-        return;
-    }
-
-    const orderid = orderData.orderid;
-
-    // Get productid
-    const { data: productData, error: productError } = await supabase
-        .from('product')
-        .select('productid')
-        .eq('productname', productname)
-        .single();
-
-    if (productError || !productData) {
-        alert("Error fetching product information.");
-        console.error(productError);
-        return;
-    }
-
-    const productid = productData.productid;
-
-    // Insert into orders_has_product table
-    const { error: orderProductError } = await supabase
-        .from('orders_has_product')
-        .insert([
-            {
-                orders_orderid: orderid,
-                product_productid: productid,
-                quantity: quantity
-            }
-        ]);
-
-    if (orderProductError) {
-        alert("Error linking order with product.");
-        console.error(orderProductError);
-        return;
-    }
-
-    alert("Order confirmed!");
-    window.location.href = "employeepage.html";
-}
-
 </script>
 
 </body>
-</html>
+</html> 

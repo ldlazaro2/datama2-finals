@@ -48,55 +48,103 @@
 </div>
 
 <script>
-    const supabaseUrl = "https://vdefkqccbueaoylrlsqx.supabase.co";
-    const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+    async function proceedToReceipt() {
+    const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    const gasPrices = { "1": 65.75, "2": 60.50, "3": 55.25 };
-    const supplierId = 1;  // Assuming a fixed supplier ID for Shell products
-    const employeeId = 1;  // Replace with logged-in employee's ID
+    const gasType = document.getElementById("gasType").value;
+    const quantity = parseInt(document.getElementById("quantity").value);
+    const branch = document.getElementById("branch").value;
+    const totalAmount = parseFloat(document.getElementById("totalAmount").textContent);
 
-    document.getElementById("quantity").addEventListener("input", updateTotal);
-    document.getElementById("gasType").addEventListener("change", updateTotal);
+    // Get Employee ID (Replace this with actual session data if using authentication)
+    let { data: employeeData, error: employeeError } = await supabase
+        .from("employee")
+        .select("employeeid")
+        .eq("emp_branch", branch)
+        .limit(1)
+        .single();
 
-    function updateTotal() {
-        const gasType = document.getElementById("gasType").value;
-        const quantity = parseFloat(document.getElementById("quantity").value);
-        const totalAmount = gasPrices[gasType] * quantity;
-        document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
+    if (employeeError || !employeeData) {
+        console.error("Error fetching employee:", employeeError);
+        alert("Employee not found!");
+        return;
+    }
+    const employeeId = employeeData.employeeid;
+
+    // Get Supplier ID (Assuming one supplier per gas type)
+    let { data: supplierData, error: supplierError } = await supabase
+        .from("supplier")
+        .select("supplierid")
+        .limit(1)
+        .single();
+
+    if (supplierError || !supplierData) {
+        console.error("Error fetching supplier:", supplierError);
+        alert("Supplier not found!");
+        return;
+    }
+    const supplierId = supplierData.supplierid;
+
+    // Insert into Orders table
+    const { data: orderData, error: orderError } = await supabase
+        .from("orders")
+        .insert([
+            {
+                supplierid: supplierId,
+                employeeid: employeeId,
+                orderdate: new Date().toISOString(),
+                totalamount: totalAmount,
+            },
+        ])
+        .select()
+        .single();
+
+    if (orderError || !orderData) {
+        console.error("Error inserting order:", orderError);
+        alert("Order failed!");
+        return;
     }
 
-    async function processTransaction() {
-        const gasType = document.getElementById("gasType").value;
-        const quantity = document.getElementById("quantity").value;
-        const totalAmount = document.getElementById("totalAmount").textContent;
-        const orderDate = new Date().toISOString();
+    const orderId = orderData.orderid;
 
-        // Insert into Orders table
-        const { data: order, error: orderError } = await supabase
-            .from("orders")
-            .insert([{ supplierid: supplierId, employeeid: employeeId, orderdate: orderDate, totalamount: totalAmount }])
-            .select()
-            .single();
+    // Get Product ID for the selected gas type
+    let { data: productData, error: productError } = await supabase
+        .from("product")
+        .select("productid")
+        .eq("productname", gasType)
+        .limit(1)
+        .single();
 
-        if (orderError) {
-            console.error("Error inserting order:", orderError.message);
-            return;
-        }
-
-        // Insert into Orders_Has_Product table
-        const { error: productError } = await supabase
-            .from("orders_has_product")
-            .insert([{ orders_orderid: order.orderid, product_productid: gasType, quantity: quantity }]);
-
-        if (productError) {
-            console.error("Error inserting order product:", productError.message);
-            return;
-        }
-
-        alert("Order successfully placed!");
-        window.location.href = `receipt.html?orderid=${order.orderid}`;
+    if (productError || !productData) {
+        console.error("Error fetching product:", productError);
+        alert("Product not found!");
+        return;
     }
+    const productId = productData.productid;
+
+    // Insert into Orders_Has_Product table
+    const { error: orderProductError } = await supabase
+        .from("orders_has_product")
+        .insert([
+            {
+                orders_orderid: orderId,
+                product_productid: productId,
+                quantity: quantity,
+            },
+        ]);
+
+    if (orderProductError) {
+        console.error("Error inserting into Orders_Has_Product:", orderProductError);
+        alert("Failed to add product to order!");
+        return;
+    }
+
+    // Redirect to receipt page
+    window.location.href = `receipt.html?orderId=${orderId}`;
+}
+
 </script>
 
 </body>

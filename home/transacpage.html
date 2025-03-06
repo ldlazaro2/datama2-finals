@@ -54,7 +54,7 @@
         3: 55.25  // Diesel
     };
 
-    // Calculate total cost when quantity changes
+
     document.getElementById("quantity").addEventListener("input", function() {
         const gasType = document.getElementById("gasType").value;
         const quantity = parseFloat(document.getElementById("quantity").value);
@@ -62,14 +62,13 @@
         document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
     });
 
-    // Redirect to receipt.html with selected data
+
     function proceedToReceipt() {
         const gasType = document.getElementById("gasType").value;
         const quantity = document.getElementById("quantity").value;
         const branch = document.getElementById("branch").value;
         const totalAmount = document.getElementById("totalAmount").textContent;
 
-        // Redirect to receipt.html with query parameters
         window.location.href = `receipt.html?gasType=${gasType}&quantity=${quantity}&branch=${branch}&totalAmount=${totalAmount}`;
     }
 </script>

@@ -16,7 +16,6 @@
 </head>
 <body>
 
-<!-- Navbar -->
 <div class="w3-top">
     <div class="w3-bar w3-card">
         <a href="#" class="w3-bar-item w3-button"><b>Shell</b> Gas Station</a>
@@ -24,7 +23,6 @@
     </div>
 </div>
 
-<!-- Receipt Details -->
 <div class="w3-content w3-padding content" style="max-width:600px">
     <h2 class="w3-margin-top">Receipt</h2>
     <div class="card">
@@ -51,12 +49,17 @@
 </div>
 
 <script>
-    // Get query parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     document.getElementById("gasType").textContent = urlParams.get("gasType");
     document.getElementById("quantity").textContent = urlParams.get("quantity");
     document.getElementById("branch").textContent = urlParams.get("branch");
     document.getElementById("totalAmount").textContent = urlParams.get("totalAmount");
+
+    const supabase = window.supabase.createClient(
+            'https://nyfcjxeebjzejsutbgub.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE'
+        );
+
 
     function confirmOrder() {
         alert("Order confirmed!");

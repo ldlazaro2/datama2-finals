@@ -31,9 +31,9 @@
     <div class="card">
         <label for="gasType"><strong>Gas Type:</strong></label>
         <select id="gasType" class="w3-input w3-border">
-            <option value="Premium Gas">Premium Gas - ₱65.75</option>
-            <option value="Unleaded">Unleaded - ₱60.50</option>
-            <option value="Diesel">Diesel - ₱55.25</option>
+            <option value="1">Premium Gas - ₱65.75</option>
+            <option value="2">Unleaded - ₱60.50</option>
+            <option value="3">Diesel - ₱55.25</option>
         </select>
 
         <label for="quantity"><strong>Quantity (liters):</strong></label>
@@ -44,30 +44,58 @@
 
         <p><strong>Total Cost:</strong> ₱<span id="totalAmount">0.00</span></p>
     </div>
-    <button class="receipt-btn" onclick="proceedToReceipt()">Proceed to Receipt</button>
+    <button class="receipt-btn" onclick="processTransaction()">Confirm Order</button>
 </div>
 
 <script>
-    const gasPrices = {
-        "Premium Gas": 65.75,
-        "Unleaded": 60.50,
-        "Diesel": 55.25
-    };
+    const supabaseUrl = "https://vdefkqccbueaoylrlsqx.supabase.co";
+    const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    document.getElementById("quantity").addEventListener("input", function() {
+    const gasPrices = { "1": 65.75, "2": 60.50, "3": 55.25 };
+    const supplierId = 1;  // Assuming a fixed supplier ID for Shell products
+    const employeeId = 1;  // Replace with logged-in employee's ID
+
+    document.getElementById("quantity").addEventListener("input", updateTotal);
+    document.getElementById("gasType").addEventListener("change", updateTotal);
+
+    function updateTotal() {
         const gasType = document.getElementById("gasType").value;
         const quantity = parseFloat(document.getElementById("quantity").value);
         const totalAmount = gasPrices[gasType] * quantity;
         document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
-    });
+    }
 
-    function proceedToReceipt() {
+    async function processTransaction() {
         const gasType = document.getElementById("gasType").value;
         const quantity = document.getElementById("quantity").value;
-        const branch = document.getElementById("branch").value;
         const totalAmount = document.getElementById("totalAmount").textContent;
+        const orderDate = new Date().toISOString();
 
-        window.location.href = `receipt.html?gasType=${encodeURIComponent(gasType)}&quantity=${quantity}&branch=${encodeURIComponent(branch)}&totalAmount=${totalAmount}`;
+        // Insert into Orders table
+        const { data: order, error: orderError } = await supabase
+            .from("orders")
+            .insert([{ supplierid: supplierId, employeeid: employeeId, orderdate: orderDate, totalamount: totalAmount }])
+            .select()
+            .single();
+
+        if (orderError) {
+            console.error("Error inserting order:", orderError.message);
+            return;
+        }
+
+        // Insert into Orders_Has_Product table
+        const { error: productError } = await supabase
+            .from("orders_has_product")
+            .insert([{ orders_orderid: order.orderid, product_productid: gasType, quantity: quantity }]);
+
+        if (productError) {
+            console.error("Error inserting order product:", productError.message);
+            return;
+        }
+
+        alert("Order successfully placed!");
+        window.location.href = `receipt.html?orderid=${order.orderid}`;
     }
 </script>
 

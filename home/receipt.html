@@ -60,45 +60,51 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 async function confirmOrder() {
-    const productname = document.getElementById("gasType").textContent;
-    const quantity = parseInt(document.getElementById("quantity").textContent, 10);
-    const totalAmount = parseFloat(document.getElementById("totalAmount").textContent);
-    const supplierName = document.getElementById("supplier").value;
+    const urlParams = new URLSearchParams(window.location.search);
+    const productname = urlParams.get("gasType");
+    const quantity = parseInt(urlParams.get("quantity"), 10);
+    const totalamount = parseFloat(urlParams.get("totalAmount"));
+    const supplier_name = document.getElementById("supplier").value;
 
-    // Get the SupplierID
-    const { data: suppliers, error: supplierError } = await supabase
-        .from('Supplier')
-        .select('supplierID')
-        .eq('supplier_name', supplierName)
+    if (!productname || isNaN(quantity) || isNaN(totalamount)) {
+        alert("Invalid order details. Please try again.");
+        return;
+    }
+
+    // Get supplierid
+    const { data: supplierData, error: supplierError } = await supabase
+        .from('supplier')
+        .select('supplierid')
+        .eq('supplier_name', supplier_name)
         .single();
 
-    if (supplierError || !suppliers) {
-        alert("Error fetching supplier information.");
+    if (supplierError || !supplierData) {
+        alert("Error fetching supplier.");
         console.error(supplierError);
         return;
     }
 
-    const SupplierID = suppliers.supplierID;
+    const supplierid = supplierData.supplierid;
 
-    // Assuming EmployeeID is stored in session/local storage
-    const EmployeeID = localStorage.getItem("EmployeeID");
-    if (!EmployeeID) {
+    // Get employeeid from localStorage
+    const employeeid = localStorage.getItem("employeeid");
+    if (!employeeid) {
         alert("Employee not logged in.");
         return;
     }
 
-    // Insert into Orders table
+    // Insert into orders table
     const { data: orderData, error: orderError } = await supabase
-        .from('Orders')
+        .from('orders')
         .insert([
             {
-                SupplierID: SupplierID,
-                EmployeeID: EmployeeID,
-                OrderDate: new Date().toISOString(),
-                TotalAmount: totalAmount
+                supplierid: supplierid,
+                employeeid: employeeid,
+                orderdate: new Date().toISOString(),
+                totalamount: totalamount
             }
         ])
-        .select('orderID')
+        .select('orderid')
         .single();
 
     if (orderError || !orderData) {
@@ -107,13 +113,13 @@ async function confirmOrder() {
         return;
     }
 
-    const orderID = orderData.orderID;
+    const orderid = orderData.orderid;
 
-    // Get the productID
+    // Get productid
     const { data: productData, error: productError } = await supabase
-        .from('Product')
-        .select('productID')
-        .eq('ProductName', productname)
+        .from('product')
+        .select('productid')
+        .eq('productname', productname)
         .single();
 
     if (productError || !productData) {
@@ -122,14 +128,15 @@ async function confirmOrder() {
         return;
     }
 
-    const productID = productData.productID;
+    const productid = productData.productid;
 
+    // Insert into orders_has_product table
     const { error: orderProductError } = await supabase
-        .from('Orders_Has_Product')
+        .from('orders_has_product')
         .insert([
             {
-                orders_orderID: orderID,
-                product_productID: productID,
+                orders_orderid: orderid,
+                product_productid: productid,
                 quantity: quantity
             }
         ]);
@@ -143,6 +150,7 @@ async function confirmOrder() {
     alert("Order confirmed!");
     window.location.href = "employeepage.html";
 }
+
 </script>
 
 </body>

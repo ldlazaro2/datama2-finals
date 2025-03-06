@@ -48,9 +48,19 @@
 </div>
 
 <script>
+    // 🛠 FIX: Define Supabase before using it
     const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // 🛠 FIX: Define updateTotal() before using it
+    function updateTotal() {
+        let product = document.getElementById("product");
+        let quantity = parseInt(document.getElementById("quantity").value) || 1;
+        let price = parseFloat(product.options[product.selectedIndex].getAttribute("data-price"));
+        document.getElementById("totalAmount").textContent = (quantity * price).toFixed(2);
+    }
+    updateTotal();
 
     async function proceedToReceipt() {
         try {
@@ -156,3 +166,4 @@
 
 </body>
 </html>
+

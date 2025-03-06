@@ -56,36 +56,93 @@
     document.getElementById("totalAmount").textContent = urlParams.get("totalAmount");
 
     const supabaseUrl = 'https://nyfcjxeebjzejsutbgub.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE'; // Replace this with the correct anon key
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    async function confirmOrder() {
-        const productname = document.getElementById("productname").textContent;
-        const quantity = document.getElementById("quantity").textContent;
-        const branch = document.getElementById("branch").textContent;
-        const totalAmount = document.getElementById("totalAmount").textContent;
-        const supplier = document.getElementById("supplier").value;
+async function confirmOrder() {
+    const productname = document.getElementById("gasType").textContent;
+    const quantity = parseInt(document.getElementById("quantity").textContent, 10);
+    const totalAmount = parseFloat(document.getElementById("totalAmount").textContent);
+    const supplierName = document.getElementById("supplier").value;
 
-        const { data, error } = await supabase
-            .from('Orders')
-            .insert([
-                { 
-                    productname: productname, 
-                    quantity: quantity, 
-                    branch: branch, 
-                    totalAmount: totalAmount, 
-                    supplier: supplier 
-                }
-            ]);
+    // Get the SupplierID
+    const { data: suppliers, error: supplierError } = await supabase
+        .from('Supplier')
+        .select('supplierID')
+        .eq('supplier_name', supplierName)
+        .single();
 
-        if (error) {
-            console.error('Error inserting order:', error);
-            alert("There was an error confirming your order. Please try again.");
-        } else {
-            alert("Order confirmed!");
-            window.location.href = "employeepage.html";
-        }
+    if (supplierError || !suppliers) {
+        alert("Error fetching supplier information.");
+        console.error(supplierError);
+        return;
     }
+
+    const SupplierID = suppliers.supplierID;
+
+    // Assuming EmployeeID is stored in session/local storage
+    const EmployeeID = localStorage.getItem("EmployeeID");
+    if (!EmployeeID) {
+        alert("Employee not logged in.");
+        return;
+    }
+
+    // Insert into Orders table
+    const { data: orderData, error: orderError } = await supabase
+        .from('Orders')
+        .insert([
+            {
+                SupplierID: SupplierID,
+                EmployeeID: EmployeeID,
+                OrderDate: new Date().toISOString(),
+                TotalAmount: totalAmount
+            }
+        ])
+        .select('orderID')
+        .single();
+
+    if (orderError || !orderData) {
+        alert("Error placing order.");
+        console.error(orderError);
+        return;
+    }
+
+    const orderID = orderData.orderID;
+
+    // Get the productID
+    const { data: productData, error: productError } = await supabase
+        .from('Product')
+        .select('productID')
+        .eq('ProductName', productname)
+        .single();
+
+    if (productError || !productData) {
+        alert("Error fetching product information.");
+        console.error(productError);
+        return;
+    }
+
+    const productID = productData.productID;
+
+    const { error: orderProductError } = await supabase
+        .from('Orders_Has_Product')
+        .insert([
+            {
+                orders_orderID: orderID,
+                product_productID: productID,
+                quantity: quantity
+            }
+        ]);
+
+    if (orderProductError) {
+        alert("Error linking order with product.");
+        console.error(orderProductError);
+        return;
+    }
+
+    alert("Order confirmed!");
+    window.location.href = "employeepage.html";
+}
 </script>
 
 </body>

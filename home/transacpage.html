@@ -49,102 +49,108 @@
 
 <script>
     const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    function updateTotal() {
-        let product = document.getElementById("product");
-        let quantity = parseInt(document.getElementById("quantity").value) || 1;
-        let price = parseFloat(product.options[product.selectedIndex].getAttribute("data-price"));
-        document.getElementById("totalAmount").textContent = (quantity * price).toFixed(2);
-    }
-    updateTotal();
-
     async function proceedToReceipt() {
-        const productName = document.getElementById("product").value;
-        const quantity = parseInt(document.getElementById("quantity").value);
-        const branch = document.getElementById("branch").value;
-        const totalAmount = parseFloat(document.getElementById("totalAmount").textContent);
+        try {
+            // Fetch input values
+            const productName = document.getElementById("product").value;
+            const quantity = parseInt(document.getElementById("quantity").value);
+            const branch = document.getElementById("branch").value;
+            const totalAmount = parseFloat(document.getElementById("totalAmount").textContent);
+            
+            // Step 1: Fetch EmployeeID based on Branch
+            const { data: employeeData, error: employeeError } = await supabase
+                .from("Employee")
+                .select("EmployeeID")
+                .eq("emp_branch", branch)
+                .limit(1)
+                .single();
 
-        // Get Employee ID
-        let { data: employeeData, error: employeeError } = await supabase
-            .from("Employee")
-            .select("EmployeeID")
-            .eq("emp_branch", branch)
-            .limit(1)
-            .single();
+            if (employeeError || !employeeData) {
+                console.error("Employee Error:", employeeError);
+                alert("Employee not found for this branch!");
+                return;
+            }
+            const employeeID = employeeData.EmployeeID;
 
-        if (employeeError || !employeeData) {
-            alert("Employee not found!");
-            return;
+            // Step 2: Fetch SupplierID (assuming first supplier)
+            const { data: supplierData, error: supplierError } = await supabase
+                .from("Supplier")
+                .select("SupplierID")
+                .limit(1)
+                .single();
+
+            if (supplierError || !supplierData) {
+                console.error("Supplier Error:", supplierError);
+                alert("Supplier not found!");
+                return;
+            }
+            const supplierID = supplierData.SupplierID;
+
+            // Step 3: Insert order into Orders table
+            const { data: orderData, error: orderError } = await supabase
+                .from("Orders")
+                .insert([
+                    {
+                        SupplierID: supplierID,
+                        EmployeeID: employeeID,
+                        OrderDate: new Date().toISOString(),
+                        TotalAmount: totalAmount,
+                    },
+                ])
+                .select()
+                .single();
+
+            if (orderError || !orderData) {
+                console.error("Order Insert Error:", orderError);
+                alert("Failed to create order!");
+                return;
+            }
+            const orderID = orderData.orderID;
+
+            // Step 4: Fetch ProductID
+            const { data: productData, error: productError } = await supabase
+                .from("Product")
+                .select("productID")
+                .eq("ProductName", productName)
+                .limit(1)
+                .single();
+
+            if (productError || !productData) {
+                console.error("Product Error:", productError);
+                alert("Product not found!");
+                return;
+            }
+            const productID = productData.productID;
+
+            // Step 5: Insert into Orders_Has_Product table
+            const { error: orderProductError } = await supabase
+                .from("Orders_Has_Product")
+                .insert([
+                    {
+                        orders_orderID: orderID,
+                        product_productID: productID,
+                        quantity: quantity,
+                    },
+                ]);
+
+            if (orderProductError) {
+                console.error("Orders_Has_Product Insert Error:", orderProductError);
+                alert("Failed to add product to order!");
+                return;
+            }
+
+            // Step 6: Redirect to receipt page
+            const receiptURL = `receipt.html?productName=${encodeURIComponent(productName)}&quantity=${quantity}&branch=${encodeURIComponent(branch)}&totalAmount=${totalAmount}`;
+            console.log("Redirecting to:", receiptURL);
+            window.location.href = receiptURL;
+
+        } catch (error) {
+            console.error("Unexpected Error:", error);
+            alert("Something went wrong, please try again.");
         }
-        const employeeID = employeeData.EmployeeID;
-
-        // Get Supplier ID (assuming one supplier)
-        let { data: supplierData, error: supplierError } = await supabase
-            .from("Supplier")
-            .select("SupplierID")
-            .limit(1)
-            .single();
-
-        if (supplierError || !supplierData) {
-            alert("Supplier not found!");
-            return;
-        }
-        const supplierID = supplierData.SupplierID;
-
-        // Insert order into Orders table
-        let { data: orderData, error: orderError } = await supabase
-            .from("Orders")
-            .insert([
-                {
-                    SupplierID: supplierID,
-                    EmployeeID: employeeID,
-                    OrderDate: new Date().toISOString(),
-                    TotalAmount: totalAmount,
-                },
-            ])
-            .select()
-            .single();
-
-        if (orderError || !orderData) {
-            alert("Order failed!");
-            return;
-        }
-        const orderID = orderData.orderID;
-
-        // Get Product ID
-        let { data: productData, error: productError } = await supabase
-            .from("Product")
-            .select("productID")
-            .eq("ProductName", productName)
-            .limit(1)
-            .single();
-
-        if (productError || !productData) {
-            alert("Product not found!");
-            return;
-        }
-        const productID = productData.productID;
-
-        // Insert into Orders_Has_Product table
-        let { error: orderProductError } = await supabase
-            .from("Orders_Has_Product")
-            .insert([
-                {
-                    orders_orderID: orderID,
-                    product_productID: productID,
-                    quantity: quantity,
-                },
-            ]);
-
-        if (orderProductError) {
-            alert("Failed to add product to order!");
-            return;
-        }
-
-        // Redirect to receipt page
-        window.location.href = `receipt.html?productName=${encodeURIComponent(productName)}&quantity=${quantity}&branch=${encodeURIComponent(branch)}&totalAmount=${totalAmount}`;
     }
 </script>
 

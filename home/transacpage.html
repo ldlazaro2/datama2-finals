@@ -49,10 +49,9 @@
 
 <script>
     const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Function to update total price when quantity or gas type changes
     function updateTotal() {
         let product = document.getElementById("product");
         let quantity = parseInt(document.getElementById("quantity").value) || 1;
@@ -62,15 +61,15 @@
     updateTotal();
 
     async function proceedToReceipt() {
-        const productname = document.getElementById("product").value;
+        const productName = document.getElementById("product").value;
         const quantity = parseInt(document.getElementById("quantity").value);
         const branch = document.getElementById("branch").value;
         const totalAmount = parseFloat(document.getElementById("totalAmount").textContent);
 
         // Get Employee ID
         let { data: employeeData, error: employeeError } = await supabase
-            .from("employee")
-            .select("employeeID")
+            .from("Employee")
+            .select("EmployeeID")
             .eq("emp_branch", branch)
             .limit(1)
             .single();
@@ -79,12 +78,12 @@
             alert("Employee not found!");
             return;
         }
-        const employeeid = employeeData.EmployeeID;
+        const employeeID = employeeData.EmployeeID;
 
         // Get Supplier ID (assuming one supplier)
         let { data: supplierData, error: supplierError } = await supabase
-            .from("supplier")
-            .select("supplierid")
+            .from("Supplier")
+            .select("SupplierID")
             .limit(1)
             .single();
 
@@ -92,14 +91,15 @@
             alert("Supplier not found!");
             return;
         }
-        const supplierid = supplierData.supplierid;
+        const supplierID = supplierData.SupplierID;
 
-        const { data: orderData, error: orderError } = await supabase
+        // Insert order into Orders table
+        let { data: orderData, error: orderError } = await supabase
             .from("Orders")
             .insert([
                 {
-                    SupplierID: supplierId,
-                    EmployeeID: employeeId,
+                    SupplierID: supplierID,
+                    EmployeeID: employeeID,
                     OrderDate: new Date().toISOString(),
                     TotalAmount: totalAmount,
                 },
@@ -111,14 +111,13 @@
             alert("Order failed!");
             return;
         }
-
-        const orderid = orderData.orderID;
+        const orderID = orderData.orderID;
 
         // Get Product ID
         let { data: productData, error: productError } = await supabase
-            .from("product")
-            .select("productid")
-            .eq("productname", productname)
+            .from("Product")
+            .select("productID")
+            .eq("ProductName", productName)
             .limit(1)
             .single();
 
@@ -126,15 +125,15 @@
             alert("Product not found!");
             return;
         }
-        const productid = productData.productID;
+        const productID = productData.productID;
 
         // Insert into Orders_Has_Product table
-        const { error: orderProductError } = await supabase
-            .from("orders_has_product")
+        let { error: orderProductError } = await supabase
+            .from("Orders_Has_Product")
             .insert([
                 {
-                    orders_orderID: orderId,
-                    product_productID: productId,
+                    orders_orderID: orderID,
+                    product_productID: productID,
                     quantity: quantity,
                 },
             ]);
@@ -144,8 +143,8 @@
             return;
         }
 
-        // Redirect to receipt page with order details
-        window.location.href = `receipt.html?productName=${productName}&quantity=${quantity}&branch=${branch}&totalAmount=${totalAmount}`;
+        // Redirect to receipt page
+        window.location.href = `receipt.html?productName=${encodeURIComponent(productName)}&quantity=${quantity}&branch=${encodeURIComponent(branch)}&totalAmount=${totalAmount}`;
     }
 </script>
 

@@ -31,9 +31,9 @@
     <div class="card">
         <label for="gasType"><strong>Gas Type:</strong></label>
         <select id="gasType" class="w3-input w3-border">
-            <option value="1">Premium Gas - ₱65.75</option>
-            <option value="2">Unleaded - ₱60.50</option>
-            <option value="3">Diesel - ₱55.25</option>
+            <option value="Premium Gas">Premium Gas - ₱65.75</option>
+            <option value="Unleaded">Unleaded - ₱60.50</option>
+            <option value="Diesel">Diesel - ₱55.25</option>
         </select>
 
         <label for="quantity"><strong>Quantity (liters):</strong></label>
@@ -49,11 +49,10 @@
 
 <script>
     const gasPrices = {
-        1: 65.75, // Premium Gas
-        2: 60.50, // Regular Gas
-        3: 55.25  // Diesel
+        "Premium Gas": 65.75,
+        "Unleaded": 60.50,
+        "Diesel": 55.25
     };
-
 
     document.getElementById("quantity").addEventListener("input", function() {
         const gasType = document.getElementById("gasType").value;
@@ -62,14 +61,13 @@
         document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
     });
 
-
     function proceedToReceipt() {
         const gasType = document.getElementById("gasType").value;
         const quantity = document.getElementById("quantity").value;
         const branch = document.getElementById("branch").value;
         const totalAmount = document.getElementById("totalAmount").textContent;
 
-        window.location.href = `receipt.html?gasType=${gasType}&quantity=${quantity}&branch=${branch}&totalAmount=${totalAmount}`;
+        window.location.href = `receipt.html?gasType=${encodeURIComponent(gasType)}&quantity=${quantity}&branch=${encodeURIComponent(branch)}&totalAmount=${totalAmount}`;
     }
 </script>
 

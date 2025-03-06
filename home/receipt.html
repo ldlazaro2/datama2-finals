@@ -61,7 +61,7 @@ const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 async function confirmOrder() {
     const urlParams = new URLSearchParams(window.location.search);
-    const productname = urlParams.get("gasType");
+    const productname = urlParams.get("productname");
     const quantity = parseInt(urlParams.get("quantity"), 10);
     const totalamount = parseFloat(urlParams.get("totalAmount"));
     const supplier_name = document.getElementById("supplier").value;

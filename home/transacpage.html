@@ -29,122 +29,124 @@
 <div class="w3-content w3-padding content" style="max-width:600px">
     <h2 class="w3-margin-top">Transaction Summary</h2>
     <div class="card">
-        <label for="gasType"><strong>Gas Type:</strong></label>
-        <select id="gasType" class="w3-input w3-border">
-            <option value="1">Premium Gas - ₱65.75</option>
-            <option value="2">Unleaded - ₱60.50</option>
-            <option value="3">Diesel - ₱55.25</option>
+        <label for="product"><strong>Gas Type:</strong></label>
+        <select id="product" class="w3-input w3-border" onchange="updateTotal()">
+            <option value="Premium Gas" data-price="65.75">Premium Gas - ₱65.75</option>
+            <option value="Unleaded" data-price="60.50">Unleaded - ₱60.50</option>
+            <option value="Diesel" data-price="55.25">Diesel - ₱55.25</option>
         </select>
 
         <label for="quantity"><strong>Quantity (liters):</strong></label>
-        <input type="number" id="quantity" class="w3-input w3-border" min="1" value="1">
+        <input type="number" id="quantity" class="w3-input w3-border" min="1" value="1" oninput="updateTotal()">
 
         <label for="branch"><strong>Branch:</strong></label>
         <input type="text" id="branch" class="w3-input w3-border" value="Branch A">
 
         <p><strong>Total Cost:</strong> ₱<span id="totalAmount">0.00</span></p>
     </div>
-    <button class="receipt-btn" onclick="processTransaction()">Confirm Order</button>
+    <button class="receipt-btn" onclick="proceedToReceipt()">Confirm Order</button>
 </div>
 
 <script>
-    async function proceedToReceipt() {
     const supabaseUrl = "https://nyfcjxeebjzejsutbgub.supabase.co";
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZmNqeGVlYmp6ZWpzdXRiZ3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjI0MjUsImV4cCI6MjA1NjQ5ODQyNX0.OEkEIPw-AAtYwbp8BrZP-CfZNQ8WqZIwjVwunUwV1QE";
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    const gasType = document.getElementById("gasType").value;
-    const quantity = parseInt(document.getElementById("quantity").value);
-    const branch = document.getElementById("branch").value;
-    const totalAmount = parseFloat(document.getElementById("totalAmount").textContent);
-
-    // Get Employee ID (Replace this with actual session data if using authentication)
-    let { data: employeeData, error: employeeError } = await supabase
-        .from("employee")
-        .select("employeeid")
-        .eq("emp_branch", branch)
-        .limit(1)
-        .single();
-
-    if (employeeError || !employeeData) {
-        console.error("Error fetching employee:", employeeError);
-        alert("Employee not found!");
-        return;
+    // Function to update total price when quantity or gas type changes
+    function updateTotal() {
+        let product = document.getElementById("product");
+        let quantity = parseInt(document.getElementById("quantity").value) || 1;
+        let price = parseFloat(product.options[product.selectedIndex].getAttribute("data-price"));
+        document.getElementById("totalAmount").textContent = (quantity * price).toFixed(2);
     }
-    const employeeId = employeeData.employeeid;
+    updateTotal();
 
-    // Get Supplier ID (Assuming one supplier per gas type)
-    let { data: supplierData, error: supplierError } = await supabase
-        .from("supplier")
-        .select("supplierid")
-        .limit(1)
-        .single();
+    async function proceedToReceipt() {
+        const productname = document.getElementById("product").value;
+        const quantity = parseInt(document.getElementById("quantity").value);
+        const branch = document.getElementById("branch").value;
+        const totalAmount = parseFloat(document.getElementById("totalAmount").textContent);
 
-    if (supplierError || !supplierData) {
-        console.error("Error fetching supplier:", supplierError);
-        alert("Supplier not found!");
-        return;
+        // Get Employee ID
+        let { data: employeeData, error: employeeError } = await supabase
+            .from("employee")
+            .select("employeeID")
+            .eq("emp_branch", branch)
+            .limit(1)
+            .single();
+
+        if (employeeError || !employeeData) {
+            alert("Employee not found!");
+            return;
+        }
+        const employeeid = employeeData.EmployeeID;
+
+        // Get Supplier ID (assuming one supplier)
+        let { data: supplierData, error: supplierError } = await supabase
+            .from("supplier")
+            .select("supplierid")
+            .limit(1)
+            .single();
+
+        if (supplierError || !supplierData) {
+            alert("Supplier not found!");
+            return;
+        }
+        const supplierid = supplierData.supplierid;
+
+        const { data: orderData, error: orderError } = await supabase
+            .from("Orders")
+            .insert([
+                {
+                    SupplierID: supplierId,
+                    EmployeeID: employeeId,
+                    OrderDate: new Date().toISOString(),
+                    TotalAmount: totalAmount,
+                },
+            ])
+            .select()
+            .single();
+
+        if (orderError || !orderData) {
+            alert("Order failed!");
+            return;
+        }
+
+        const orderid = orderData.orderID;
+
+        // Get Product ID
+        let { data: productData, error: productError } = await supabase
+            .from("product")
+            .select("productid")
+            .eq("productname", productname)
+            .limit(1)
+            .single();
+
+        if (productError || !productData) {
+            alert("Product not found!");
+            return;
+        }
+        const productid = productData.productID;
+
+        // Insert into Orders_Has_Product table
+        const { error: orderProductError } = await supabase
+            .from("orders_has_product")
+            .insert([
+                {
+                    orders_orderID: orderId,
+                    product_productID: productId,
+                    quantity: quantity,
+                },
+            ]);
+
+        if (orderProductError) {
+            alert("Failed to add product to order!");
+            return;
+        }
+
+        // Redirect to receipt page with order details
+        window.location.href = `receipt.html?productName=${productName}&quantity=${quantity}&branch=${branch}&totalAmount=${totalAmount}`;
     }
-    const supplierId = supplierData.supplierid;
-
-    // Insert into Orders table
-    const { data: orderData, error: orderError } = await supabase
-        .from("orders")
-        .insert([
-            {
-                supplierid: supplierId,
-                employeeid: employeeId,
-                orderdate: new Date().toISOString(),
-                totalamount: totalAmount,
-            },
-        ])
-        .select()
-        .single();
-
-    if (orderError || !orderData) {
-        console.error("Error inserting order:", orderError);
-        alert("Order failed!");
-        return;
-    }
-
-    const orderId = orderData.orderid;
-
-    // Get Product ID for the selected gas type
-    let { data: productData, error: productError } = await supabase
-        .from("product")
-        .select("productid")
-        .eq("productname", gasType)
-        .limit(1)
-        .single();
-
-    if (productError || !productData) {
-        console.error("Error fetching product:", productError);
-        alert("Product not found!");
-        return;
-    }
-    const productId = productData.productid;
-
-    // Insert into Orders_Has_Product table
-    const { error: orderProductError } = await supabase
-        .from("orders_has_product")
-        .insert([
-            {
-                orders_orderid: orderId,
-                product_productid: productId,
-                quantity: quantity,
-            },
-        ]);
-
-    if (orderProductError) {
-        console.error("Error inserting into Orders_Has_Product:", orderProductError);
-        alert("Failed to add product to order!");
-        return;
-    }
-
-    // Redirect to receipt page
-    window.location.href = `receipt.html?orderId=${orderId}`;
-}
-
 </script>
 
 </body>
